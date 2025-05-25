@@ -1,15 +1,15 @@
-package dbConnect;
+package common;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class DBConnect {
+public class DBConnectTest {
 	public static void main (String[] args) {
 		try {
-			Class.forName("com.mysql.cj.jdbc.Driver"); // MySQL 드라이버 로드
-			Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/DBTEST", "root","kingpin100"
-					+ ""); // JDBC 연결
+			Class.forName("com.mysql.cj." +
+					"jdbc.Driver"); // MySQL 드라이버 로드
+			Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/DBTEST", "root","kingpin100"); // JDBC 연결
 			System.out.println("DB 연결 완료");
 		} catch (ClassNotFoundException e) {
 			System.out.println("JDBC 드라이버 로드 오류");
@@ -18,3 +18,4 @@ public class DBConnect {
 		}
 	}
 }
+

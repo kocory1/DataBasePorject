@@ -1,14 +1,14 @@
 
 
 -- 1. DB 삭제 및 생성
-DROP DATABASE IF EXISTS DBTEST;
-CREATE DATABASE DBTEST;
-USE DBTEST;
+DROP DATABASE IF EXISTS camping_car_db;
+CREATE DATABASE camping_car_db;
+USE camping_car_db;
 
 -- 2. 사용자 생성 및 권한 부여
 DROP USER IF EXISTS 'user1'@'localhost';
 CREATE USER 'user1'@'localhost' IDENTIFIED BY 'user1';
-GRANT SELECT, INSERT, UPDATE, DELETE ON DBTEST.* TO 'user1'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE ON camping_car_db.* TO 'user1'@'localhost';
 
 -- 3. 테이블 생성
 
@@ -126,7 +126,7 @@ FLUSH PRIVILEGES;
 
 -- 5. 샘플 데이터 삽입
 
-USE DBTEST;
+USE camping_car_db;
 
 -- 샘플 데이터 삽입
 
