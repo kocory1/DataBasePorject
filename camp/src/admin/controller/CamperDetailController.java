@@ -71,6 +71,22 @@ public class CamperDetailController {
                     // 정비소 정보 보기 (외부 정비에서 사용된 정비소들)
                     showShopDetails(detail);
                     break;
+                case "5":
+                    // 새 캠핑카 선택 처리 - UI에서 캠핑카 선택 버튼을 누른 경우
+                    CamperSummary newSelectedCamper = view.getSelectedCamper();
+                    if (newSelectedCamper != null) {
+                        try {
+                            view.showProgress("새 캠핑카 정보 조회 중...");
+                            CamperDetailInfo newDetail = service.getCamperDetail(newSelectedCamper.getCamperId());
+                            view.showCamperDetail(newDetail);
+                            
+                            // 현재 디테일 정보 업데이트하고 계속 처리
+                            detail = newDetail;
+                        } catch (Exception e) {
+                            view.showError("캠핑카 정보 조회 실패: " + e.getMessage());
+                        }
+                    }
+                    break;
                 case "0":
                     return;
                 default:

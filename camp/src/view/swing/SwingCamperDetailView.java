@@ -97,6 +97,23 @@ public class SwingCamperDetailView extends JFrame implements CamperDetailView {
         // 초기에는 정비 버튼 비활성화
         internalMaintenanceButton.setEnabled(false);
         externalMaintenanceButton.setEnabled(false);
+        
+        // 오류 방지: 창 닫기 시 항상 리소스 해제되도록 설정
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                // 리소스 초기화
+                selectedCamper = null;
+                currentInternalMaintenance = null;
+                currentExternalMaintenance = null;
+                
+                // 대기 중인 스레드 해제
+                synchronized (choiceLock) {
+                    currentChoice = "0"; 
+                    choiceLock.notifyAll();
+                }
+            }
+        });
     }
     
     /**
@@ -200,11 +217,24 @@ public class SwingCamperDetailView extends JFrame implements CamperDetailView {
     }
     
     private void setupEventHandlers() {
+        // 캠핑카 선택 버튼 액션 리스너
         selectButton.addActionListener(e -> {
             if (camperComboBox.getSelectedItem() != null) {
-                synchronized (choiceLock) {
-                    selectedCamper = (CamperSummary) camperComboBox.getSelectedItem();
-                    choiceLock.notify();
+                // 첫 번째 선택인 경우에만 choiceLock.notify() 호출
+                // (그렇지 않으면 두 번째 선택시 showDetailOptions()가 반환되어 메인으로 돌아감)
+                if (selectedCamper == null) {
+                    synchronized (choiceLock) {
+                        selectedCamper = (CamperSummary) camperComboBox.getSelectedItem();
+                        choiceLock.notify();
+                    }
+                } else {
+                    // 이미 선택된 상태에서 다시 선택하는 경우
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "이미 캠핑카를 조회 중입니다.\n다른 캠핑카를 보려면 뒤로가기 후 다시 선택해주세요.",
+                        "안내",
+                        JOptionPane.INFORMATION_MESSAGE
+                    );
                 }
             }
         });
@@ -232,7 +262,26 @@ public class SwingCamperDetailView extends JFrame implements CamperDetailView {
         backButton.addActionListener(e -> {
             synchronized (choiceLock) {
                 currentChoice = "0";
+                // 리소스 초기화
+                selectedCamper = null;
+                currentInternalMaintenance = null;
+                currentExternalMaintenance = null;
                 choiceLock.notify();
+            }
+        });
+        
+        // 창 닫기 이벤트 처리 추가
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                synchronized (choiceLock) {
+                    currentChoice = "0";
+                    // 리소스 초기화
+                    selectedCamper = null;
+                    currentInternalMaintenance = null;
+                    currentExternalMaintenance = null;
+                    choiceLock.notify();
+                }
             }
         });
         
@@ -250,87 +299,136 @@ public class SwingCamperDetailView extends JFrame implements CamperDetailView {
     
     /**
      * 테이블 행 클릭 처리 - 요구사항: 부품/정비소 선택 시 상세 정보 표시
+     * 주의: 이 메서드는 단순히 UI를 업데이트하는 역할만 수행하며,
+     * choiceLock을 사용하거나 notify()를 호출하지 않습니다.
      */
     private void handleTableRowClick(int selectedRow) {
-        if (showingInternalMaintenance && currentInternalMaintenance != null && 
-            selectedRow < currentInternalMaintenance.size()) {
-            // 자체 정비 내역 선택 시 부품 재고와 공급회사 정보 표시
-            InternalMaintenanceInfo maintenance = currentInternalMaintenance.get(selectedRow);
-            showPartDetailInfo(maintenance);
-            statusLabel.setText("선택된 부품: " + maintenance.getPartName());
-            
-        } else if (!showingInternalMaintenance && currentExternalMaintenance != null && 
-                   selectedRow < currentExternalMaintenance.size()) {
-            // 외부 정비 내역 선택 시 정비소 상세 정보 표시
-            ExternalMaintenanceInfo maintenance = currentExternalMaintenance.get(selectedRow);
-            showShopDetailInfo(maintenance);
-            statusLabel.setText("선택된 정비소: " + maintenance.getShopName());
+        try {
+            if (showingInternalMaintenance && currentInternalMaintenance != null && 
+                selectedRow < currentInternalMaintenance.size()) {
+                // 자체 정비 내역 선택 시 부품 재고와 공급회사 정보 표시
+                InternalMaintenanceInfo maintenance = currentInternalMaintenance.get(selectedRow);
+                showPartDetailInfo(maintenance);
+                statusLabel.setText("선택된 부품: " + maintenance.getPartName());
+                
+            } else if (!showingInternalMaintenance && currentExternalMaintenance != null && 
+                       selectedRow < currentExternalMaintenance.size()) {
+                // 외부 정비 내역 선택 시 정비소 상세 정보 표시
+                ExternalMaintenanceInfo maintenance = currentExternalMaintenance.get(selectedRow);
+                showShopDetailInfo(maintenance);
+                statusLabel.setText("선택된 정비소: " + maintenance.getShopName());
+            }
+        } catch (Exception e) {
+            // 예외 발생 시 UI 스레드에서 처리하여 애플리케이션 중단 방지
+            SwingUtilities.invokeLater(() -> {
+                statusLabel.setText("❌ 정보 표시 중 오류: " + e.getMessage());
+                e.printStackTrace();
+            });
         }
     }
     
     /**
      * 부품 상세 정보 표시 - 요구사항: 부품 재고와 공급회사정보
+     * 주의: 이 메서드는 단순히 UI를 업데이트하는 역할만 수행합니다.
      */
     private void showPartDetailInfo(InternalMaintenanceInfo maintenance) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("🔧 부품 상세 정보\n");
-        sb.append("=================================\n\n");
-        
-        sb.append("📋 기본 정보\n");
-        sb.append("• 부품명: ").append(maintenance.getPartName()).append("\n");
-        sb.append("• 부품 단가: ").append(String.format("%,d원", maintenance.getPartPrice().intValue())).append("\n");
-        sb.append("• 정비일자: ").append(maintenance.getMaintenanceDate()).append("\n\n");
-        
-        sb.append("📦 재고 정보\n");
-        sb.append("• 현재 재고: ").append(maintenance.getStockQuantity()).append("개\n");
-        sb.append("• 입고일자: ").append(maintenance.getEntryDate()).append("\n");
-        sb.append("• 공급회사: ").append(maintenance.getSupplierName()).append("\n\n");
-        
-        sb.append("👨‍🔧 정비 담당자 정보\n");
-        sb.append("• 담당자: ").append(maintenance.getEmployeeName()).append("\n");
-        sb.append("• 부서: ").append(maintenance.getDepartmentName()).append("\n");
-        sb.append("• 역할: ").append(maintenance.getRole()).append("\n");
-        sb.append("• 정비 소요시간: ").append(maintenance.getMaintenanceDurationMinutes()).append("분\n");
-        
-        partDetailArea.setText(sb.toString());
-        detailTabbedPane.setSelectedIndex(0);
+        try {
+            StringBuilder sb = new StringBuilder();
+            sb.append("🔧 부품 상세 정보\n");
+            sb.append("=================================\n\n");
+            
+            sb.append("📋 기본 정보\n");
+            sb.append("• 부품명: ").append(maintenance.getPartName()).append("\n");
+            sb.append("• 부품 단가: ").append(String.format("%,d원", maintenance.getPartPrice().intValue())).append("\n");
+            sb.append("• 정비일자: ").append(maintenance.getMaintenanceDate()).append("\n\n");
+            
+            sb.append("📦 재고 정보\n");
+            sb.append("• 현재 재고: ").append(maintenance.getStockQuantity()).append("개\n");
+            sb.append("• 입고일자: ").append(maintenance.getEntryDate()).append("\n");
+            sb.append("• 공급회사: ").append(maintenance.getSupplierName()).append("\n\n");
+            
+            sb.append("👨‍🔧 정비 담당자 정보\n");
+            sb.append("• 담당자: ").append(maintenance.getEmployeeName()).append("\n");
+            sb.append("• 부서: ").append(maintenance.getDepartmentName()).append("\n");
+            sb.append("• 역할: ").append(maintenance.getRole()).append("\n");
+            sb.append("• 정비 소요시간: ").append(maintenance.getMaintenanceDurationMinutes()).append("분\n");
+            
+            // UI 업데이트는 EDT(Event Dispatch Thread)에서 수행
+            SwingUtilities.invokeLater(() -> {
+                partDetailArea.setText(sb.toString());
+                detailTabbedPane.setSelectedIndex(0);
+            });
+        } catch (Exception e) {
+            // 예외 처리
+            SwingUtilities.invokeLater(() -> {
+                statusLabel.setText("❌ 부품 정보 표시 중 오류 발생");
+                e.printStackTrace();
+            });
+        }
     }
     
     /**
      * 정비소 상세 정보 표시 - 요구사항: 정비소 상세 정보
+     * 주의: 이 메서드는 단순히 UI를 업데이트하는 역할만 수행합니다.
      */
     private void showShopDetailInfo(ExternalMaintenanceInfo maintenance) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("🏪 정비소 상세 정보\n");
-        sb.append("=================================\n\n");
-        
-        sb.append("🏢 기본 정보\n");
-        sb.append("• 정비소명: ").append(maintenance.getShopName()).append("\n");
-        sb.append("• 주소: ").append(maintenance.getShopAddress()).append("\n");
-        sb.append("• 전화번호: ").append(maintenance.getShopPhone()).append("\n");
-        sb.append("• 담당자: ").append(maintenance.getManagerName()).append("\n");
-        sb.append("• 담당자 이메일: ").append(maintenance.getManagerEmail()).append("\n\n");
-        
-        sb.append("🔧 정비 내역\n");
-        sb.append("• 정비일자: ").append(maintenance.getRepairDate()).append("\n");
-        sb.append("• 정비내용: ").append(maintenance.getMaintenanceDetails()).append("\n");
-        sb.append("• 수리비용: ").append(String.format("%,d원", maintenance.getRepairCost().intValue())).append("\n");
-        sb.append("• 납입기한: ").append(maintenance.getPaymentDueDate()).append("\n");
-        sb.append("• 고객명: ").append(maintenance.getCustomerName()).append("\n\n");
-        
-        if (maintenance.getAdditionalMaintenanceDetails() != null && !maintenance.getAdditionalMaintenanceDetails().trim().isEmpty()) {
-            sb.append("📝 추가 정비 사항\n");
-            sb.append("• ").append(maintenance.getAdditionalMaintenanceDetails()).append("\n");
+        try {
+            StringBuilder sb = new StringBuilder();
+            sb.append("🏪 정비소 상세 정보\n");
+            sb.append("=================================\n\n");
+            
+            sb.append("🏢 기본 정보\n");
+            sb.append("• 정비소명: ").append(maintenance.getShopName()).append("\n");
+            sb.append("• 주소: ").append(maintenance.getShopAddress()).append("\n");
+            sb.append("• 전화번호: ").append(maintenance.getShopPhone()).append("\n");
+            sb.append("• 담당자: ").append(maintenance.getManagerName()).append("\n");
+            sb.append("• 담당자 이메일: ").append(maintenance.getManagerEmail()).append("\n\n");
+            
+            sb.append("🔧 정비 내역\n");
+            sb.append("• 정비일자: ").append(maintenance.getRepairDate()).append("\n");
+            sb.append("• 정비내용: ").append(maintenance.getMaintenanceDetails()).append("\n");
+            sb.append("• 수리비용: ").append(String.format("%,d원", maintenance.getRepairCost().intValue())).append("\n");
+            sb.append("• 납입기한: ").append(maintenance.getPaymentDueDate()).append("\n");
+            sb.append("• 고객명: ").append(maintenance.getCustomerName()).append("\n\n");
+            
+            if (maintenance.getAdditionalMaintenanceDetails() != null && !maintenance.getAdditionalMaintenanceDetails().trim().isEmpty()) {
+                sb.append("📝 추가 정비 사항\n");
+                sb.append("• ").append(maintenance.getAdditionalMaintenanceDetails()).append("\n");
+            }
+            
+            // UI 업데이트는 EDT(Event Dispatch Thread)에서 수행
+            SwingUtilities.invokeLater(() -> {
+                shopDetailArea.setText(sb.toString());
+                detailTabbedPane.setSelectedIndex(1);
+            });
+        } catch (Exception e) {
+            // 예외 처리
+            SwingUtilities.invokeLater(() -> {
+                statusLabel.setText("❌ 정비소 정보 표시 중 오류 발생");
+                e.printStackTrace();
+            });
         }
-        
-        shopDetailArea.setText(sb.toString());
-        detailTabbedPane.setSelectedIndex(1);
     }
     
     // CamperDetailView 인터페이스 구현
     
     @Override
     public CamperSummary selectCamper(List<CamperSummary> campers) {
+        // 이전 상태 초기화
+        selectedCamper = null;
+        currentChoice = null;
+        currentInternalMaintenance = null;
+        currentExternalMaintenance = null;
+        
+        // selectButton 비활성화 후 타이머로 재활성화
+        // 이렇게 하면 사용자가 실수로 버튼을 여러 번 클릭하는 것을 방지할 수 있음
+        SwingUtilities.invokeLater(() -> {
+            selectButton.setEnabled(false);
+            Timer enableTimer = new Timer(1000, e -> selectButton.setEnabled(true));
+            enableTimer.setRepeats(false);
+            enableTimer.start();
+        });
+        
         SwingUtilities.invokeLater(() -> {
             setVisible(true);
             camperComboBox.removeAllItems();
@@ -344,7 +442,13 @@ public class SwingCamperDetailView extends JFrame implements CamperDetailView {
         
         synchronized (choiceLock) {
             try {
-                choiceLock.wait();
+                // 제한시간 추가 - 10분
+                choiceLock.wait(600000);
+                
+                // 타임아웃 발생한 경우 (아무런 선택이 없었을 경우)
+                if (selectedCamper == null) {
+                    SwingUtilities.invokeLater(() -> setVisible(false));
+                }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 return null;
@@ -387,9 +491,18 @@ public class SwingCamperDetailView extends JFrame implements CamperDetailView {
     
     @Override
     public String showDetailOptions() {
+        // 이전에 선택한 값 초기화
+        currentChoice = null;
+        
         synchronized (choiceLock) {
             try {
-                choiceLock.wait();
+                // 제한시간 추가 - 10분
+                choiceLock.wait(600000); 
+                
+                // 타임아웃 발생한 경우 (아무런 선택이 없었을 경우)
+                if (currentChoice == null) {
+                    currentChoice = "0";
+                }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 return "0";
@@ -398,6 +511,10 @@ public class SwingCamperDetailView extends JFrame implements CamperDetailView {
         
         if ("0".equals(currentChoice)) {
             SwingUtilities.invokeLater(() -> setVisible(false));
+            // 리소스 초기화
+            this.selectedCamper = null;
+            this.currentInternalMaintenance = null;
+            this.currentExternalMaintenance = null;
         }
         
         return currentChoice;
@@ -524,5 +641,10 @@ public class SwingCamperDetailView extends JFrame implements CamperDetailView {
             statusLabel.setText("✅ " + message);
             JOptionPane.showMessageDialog(this, message, "성공", JOptionPane.INFORMATION_MESSAGE);
         });
+    }
+    
+    @Override
+    public CamperSummary getSelectedCamper() {
+        return selectedCamper;
     }
 }

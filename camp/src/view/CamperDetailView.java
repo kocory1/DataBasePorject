@@ -15,6 +15,9 @@ public interface CamperDetailView {
     void showCamperDetail(CamperDetailInfo detail);
     String showDetailOptions();
     
+    // 현재 선택된 캠핑카 정보 반환 (새로운 캠핑카 선택 시 사용)
+    CamperSummary getSelectedCamper();
+    
     void showInternalMaintenanceDetail(List<InternalMaintenanceInfo> maintenanceList);
     void showExternalMaintenanceDetail(List<ExternalMaintenanceInfo> maintenanceList);
     void showPartDetails(List<InternalMaintenanceInfo> maintenanceList);
