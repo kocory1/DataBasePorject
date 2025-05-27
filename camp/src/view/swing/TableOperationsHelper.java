@@ -16,15 +16,19 @@ public class TableOperationsHelper {
     
     private final JTable resultTable;
     private final DefaultTableModel tableModel;
-    private final JTextArea queryArea;
     private final Consumer<String> messageHandler;
     
     public TableOperationsHelper(JTable resultTable, DefaultTableModel tableModel, 
-                                JTextArea queryArea, Consumer<String> messageHandler) {
+                                Consumer<String> messageHandler) {
         this.resultTable = resultTable;
         this.tableModel = tableModel;
-        this.queryArea = queryArea;
         this.messageHandler = messageHandler;
+    }
+    
+    // 이전 생성자를 유지하여 호환성 보장 (다른 곳에서 사용할 경우를 대비)
+    public TableOperationsHelper(JTable resultTable, DefaultTableModel tableModel, 
+                                JTextArea queryArea, Consumer<String> messageHandler) {
+        this(resultTable, tableModel, messageHandler);
     }
     
     /**
@@ -77,7 +81,6 @@ public class TableOperationsHelper {
             }
             
             tableModel.setDataVector(data, columns);
-            queryArea.setText(result.getExecutedSql().toString());
             messageHandler.accept(String.format("%d개 행이 조회되었습니다.", result.getRowCount()));
             
             // 테이블 열 너비 자동 조정
@@ -95,7 +98,6 @@ public class TableOperationsHelper {
             Vector<Vector<Object>> data = TableUtils.createColumnInfoDataVector(columns);
             
             tableModel.setDataVector(data, columnHeaders);
-            queryArea.setText(TableUtils.formatColumnInfoToString(columns));
             messageHandler.accept("테이블 구조 조회 완료 - " + columns.size() + "개 컬럼");
             
             // 테이블 열 너비 자동 조정

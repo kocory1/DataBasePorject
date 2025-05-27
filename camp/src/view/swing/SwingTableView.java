@@ -29,7 +29,6 @@ public class SwingTableView extends JFrame implements TableView {
     
     private JTable resultTable;
     private DefaultTableModel tableModel;
-    private JTextArea queryArea;
     private JTextArea messageArea;
     private TableMenuChoice currentChoice;
     private final Object choiceLock = new Object();
@@ -60,7 +59,7 @@ public class SwingTableView extends JFrame implements TableView {
         tableOperationsHelper = new TableOperationsHelper(
             resultTable, 
             tableModel, 
-            queryArea, 
+            null, // queryArea 제거
             message -> messageHelper.showInfo(message)
         );
     }
@@ -134,11 +133,6 @@ public class SwingTableView extends JFrame implements TableView {
      * 텍스트 영역 컴포넌트 초기화
      */
     private void initializeTextAreas() {
-        queryArea = new JTextArea(5, 50);
-        queryArea.setFont(new Font("Consolas", Font.PLAIN, 14));
-        queryArea.setLineWrap(true);
-        queryArea.setWrapStyleWord(true);
-        
         messageArea = new JTextArea(3, 50);
         messageArea.setEditable(false);
         messageArea.setFont(new Font("맑은 고딕", Font.PLAIN, 12));
@@ -179,39 +173,13 @@ public class SwingTableView extends JFrame implements TableView {
     /**
      * 중앙 컨텐츠 패널 생성
      */
-    private JSplitPane createContentPanel() {
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        splitPane.setDividerSize(5);
-        splitPane.setBorder(null);
-        
-        splitPane.setTopComponent(createQueryPanel());
-        splitPane.setBottomComponent(createResultPanel());
-        splitPane.setDividerLocation(180);
-        splitPane.setResizeWeight(0.2); // 테이블이 더 많은 공간을 차지하도록
-        
-        return splitPane;
+    private JPanel createContentPanel() {
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        contentPanel.add(createResultPanel(), BorderLayout.CENTER);
+        return contentPanel;
     }
     
-    /**
-     * 쿼리 입력 패널 생성
-     */
-    private JPanel createQueryPanel() {
-        JPanel queryPanel = new JPanel(new BorderLayout());
-        queryPanel.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(), 
-                "쿼리/입력 영역", 
-                javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
-                javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-                new Font("맑은 고딕", Font.BOLD, 12)
-        ));
-        
-        // 쿼리 영역에 라인 번호 추가
-        JScrollPane queryScroll = new JScrollPane(queryArea);
-        queryScroll.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        queryPanel.add(queryScroll, BorderLayout.CENTER);
-        
-        return queryPanel;
-    }
+
     
     /**
      * 결과 테이블 패널 생성
@@ -323,7 +291,7 @@ public class SwingTableView extends JFrame implements TableView {
     
     @Override
     public String getFullInsertSQL() {
-        return dialogHelper.getFullInsertSQL(queryArea);
+        return dialogHelper.getFullInsertSQL(null);
     }
     
     @Override
@@ -353,7 +321,7 @@ public class SwingTableView extends JFrame implements TableView {
     
     @Override
     public void showCrudResult(CrudResult result) {
-        messageHelper.showCrudResult(result, queryArea);
+        messageHelper.showCrudResult(result, null);
     }
     
     @Override

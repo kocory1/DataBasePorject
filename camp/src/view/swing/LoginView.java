@@ -2,6 +2,7 @@ package view.swing;
 
 import common.DBConnect;
 import admin.controller.AdminController;
+import view.swing.customer.CustomerMainView;
 
 import javax.swing.*;
 import java.awt.*;
@@ -260,12 +261,13 @@ public class LoginView extends JFrame {
                     "로그인 성공", 
                     JOptionPane.INFORMATION_MESSAGE);
                 
-                // 일반 회원 시스템 시작 (추후 구현)
+                // 일반 회원 메인 화면 시작
                 this.setVisible(false);
                 
-                JOptionPane.showMessageDialog(null, "일반 회원 기능은 구현 예정입니다.");
-                this.setVisible(true);
-                
+                // 실제 로그인 정보를 가져오기
+                String licenseNumber = getLicenseNumberForUser(username);
+                CustomerMainView customerView = new CustomerMainView(username, licenseNumber);
+                customerView.setVisible(true);
             } else {
                 JOptionPane.showMessageDialog(this, 
                     "아이디 또는 비밀번호가 일치하지 않습니다.", 
@@ -284,8 +286,40 @@ public class LoginView extends JFrame {
     }
     
     /**
+     * 사용자 아이디로 운전면허번호 가져오기
+     */
+    private String getLicenseNumberForUser(String username) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        String licenseNumber = "";
+        
+        try {
+            conn = DBConnect.getUserConnection();
+            
+            String sql = "SELECT license_number FROM customer WHERE username = ?";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            
+            rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                licenseNumber = rs.getString("license_number");
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("운전면허번호 조회 오류: " + e.getMessage());
+        } finally {
+            if (rs != null) try { rs.close(); } catch (SQLException e) {}
+            if (pstmt != null) try { pstmt.close(); } catch (SQLException e) {}
+            if (conn != null) try { conn.close(); } catch (SQLException e) {}
+        }
+        
+        return licenseNumber;
+    }
+    
+    /**
      * 고객 인증 - 정의서: "고객정보 테이블에 저장되어 있는 계정/비번과 일치하는지 확인"
-     * 수정: user1/user1 계정으로 DB 접속을 시도하고, 성공하면 고객정보 테이블에서 확인
      */
     private boolean authenticateCustomer(String username, String password) throws SQLException {
         Connection conn = null;
@@ -296,8 +330,8 @@ public class LoginView extends JFrame {
             // user1/user1 계정으로 DB 접속
             conn = DBConnect.getUserConnection();
             
-            // 고객정보 테이블에서 계정 확인
-            String sql = "SELECT customer_id FROM customer WHERE login_id = ? AND password = ?";
+            // 고객정보 테이블에서 계정 확인 (실제 테이블 구조에 맞게 수정)
+            String sql = "SELECT customer_id FROM customer WHERE username = ? AND password = ?";
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, username);
             pstmt.setString(2, password);

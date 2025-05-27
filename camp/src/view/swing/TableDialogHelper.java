@@ -112,17 +112,20 @@ public class TableDialogHelper {
      * INSERT SQL 전체 입력 다이얼로그 표시
      */
     public String getFullInsertSQL(JTextArea queryArea) {
+        JTextArea localQueryArea = new JTextArea(10, 50);
+        localQueryArea.setFont(new Font("Consolas", Font.PLAIN, 14));
+        localQueryArea.setLineWrap(true);
+        localQueryArea.setWrapStyleWord(true);
+        
         // 쿼리 에디터에 힌트 표시
-        SwingUtilities.invokeLater(() -> {
-            StringBuilder hintBuilder = new StringBuilder();
-            hintBuilder.append("-- 아래에 INSERT 문을 작성하세요:\n");
-            hintBuilder.append("-- 예시:\n");
-            hintBuilder.append("INSERT INTO Customer (username, password, license_number, customer_name, address, phone, email)\n");
-            hintBuilder.append("VALUES ('newuser', 'pass123', 'DL1234', '홍길동', '서울시 강남구', '010-1234-5678', 'user@example.com');\n\n");
-            
-            queryArea.setText(hintBuilder.toString());
-            queryArea.setCaretPosition(hintBuilder.length());
-        });
+        StringBuilder hintBuilder = new StringBuilder();
+        hintBuilder.append("-- 아래에 INSERT 문을 작성하세요:\n");
+        hintBuilder.append("-- 예시:\n");
+        hintBuilder.append("INSERT INTO Customer (username, password, license_number, customer_name, address, phone, email)\n");
+        hintBuilder.append("VALUES ('newuser', 'pass123', 'DL1234', '홍길동', '서울시 강남구', '010-1234-5678', 'user@example.com');\n\n");
+        
+        localQueryArea.setText(hintBuilder.toString());
+        localQueryArea.setCaretPosition(hintBuilder.length());
         
         // 사용자 정의 패널 생성
         JPanel panel = new JPanel(new BorderLayout());
@@ -140,7 +143,7 @@ public class TableDialogHelper {
         northPanel.add(viewTablesButton, BorderLayout.EAST);
         
         panel.add(northPanel, BorderLayout.NORTH);
-        panel.add(new JScrollPane(queryArea), BorderLayout.CENTER);
+        panel.add(new JScrollPane(localQueryArea), BorderLayout.CENTER);
         
         int option = JOptionPane.showConfirmDialog(
             parentFrame,
@@ -151,7 +154,7 @@ public class TableDialogHelper {
         );
         
         if (option == JOptionPane.OK_OPTION) {
-            return queryArea.getText();
+            return localQueryArea.getText();
         }
         
         return null;

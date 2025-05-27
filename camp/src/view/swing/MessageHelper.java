@@ -90,7 +90,15 @@ public class MessageHelper {
     /**
      * CRUD 작업 결과 표시
      * @param result CRUD 작업 결과
-     * @param queryArea SQL 쿼리 표시 영역
+     */
+    public void showCrudResult(CrudResult result) {
+        showCrudResult(result, null);
+    }
+    
+    /**
+     * CRUD 작업 결과 표시
+     * @param result CRUD 작업 결과
+     * @param queryArea SQL 쿼리 표시 영역 (null 가능)
      */
     public void showCrudResult(CrudResult result, JTextArea queryArea) {
         SwingUtilities.invokeLater(() -> {
@@ -181,5 +189,52 @@ public class MessageHelper {
                 SwingUtilities.invokeLater(() -> messageArea.setForeground(Color.BLACK));
             }
         }, 1000);
+    }
+    
+    // 일반 회원 화면용 정적 메소드들
+    
+    /**
+     * 정보 메시지 대화상자 표시
+     * @param parent 부모 컴포넌트
+     * @param title 제목
+     * @param message 메시지 내용
+     */
+    public static void showInfoMessage(Component parent, String title, String message) {
+        JOptionPane.showMessageDialog(
+            parent,
+            message,
+            title,
+            JOptionPane.INFORMATION_MESSAGE
+        );
+    }
+    
+    /**
+     * 경고 메시지 대화상자 표시
+     * @param parent 부모 컴포넌트
+     * @param title 제목
+     * @param message 메시지 내용
+     */
+    public static void showWarningMessage(Component parent, String title, String message) {
+        JOptionPane.showMessageDialog(
+            parent,
+            message,
+            title,
+            JOptionPane.WARNING_MESSAGE
+        );
+    }
+    
+    /**
+     * 오류 메시지 대화상자 표시
+     * @param parent 부모 컴포넌트
+     * @param title 제목
+     * @param message 메시지 내용
+     */
+    public static void showErrorMessage(Component parent, String title, String message) {
+        JOptionPane.showMessageDialog(
+            parent,
+            message,
+            title,
+            JOptionPane.ERROR_MESSAGE
+        );
     }
 }
