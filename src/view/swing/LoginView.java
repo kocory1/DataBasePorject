@@ -1,6 +1,5 @@
 package view.swing;
 
-import User.dbConnect.Db1;                       // Db1 경로
 import admin.controller.AdminController;
 import view.swing.customer.CustomerMainView;
 
@@ -9,6 +8,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.*;
+
+import static common.DBConnect.getUserConnection;
 
 /**
  * 로그인 화면
@@ -126,7 +127,7 @@ public class LoginView extends JFrame {
         ResultSet rs = null;
         try {
             // Db1.getUserConnection()에서 ClassNotFoundException 및 SQLException 처리
-            conn = Db1.getUserConnection();
+            conn = getUserConnection();
             String sql = "SELECT license_number FROM Customer WHERE username = ? AND password = ?";
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, username);
@@ -150,12 +151,6 @@ public class LoginView extends JFrame {
                         "로그인 실패",
                         JOptionPane.ERROR_MESSAGE);
             }
-        } catch (ClassNotFoundException cnfe) {
-            cnfe.printStackTrace();
-            JOptionPane.showMessageDialog(this,
-                    "JDBC 드라이버를 찾을 수 없습니다: " + cnfe.getMessage(),
-                    "로그인 오류",
-                    JOptionPane.ERROR_MESSAGE);
         } catch (SQLException sqle) {
             sqle.printStackTrace();
             JOptionPane.showMessageDialog(this,

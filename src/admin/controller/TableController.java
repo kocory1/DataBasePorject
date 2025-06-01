@@ -98,20 +98,21 @@ public class TableController {
             List<ColumnInfo> columns = service.getTableColumns(tableName);
             view.showTableStructure(columns);
 
-            // 3. 입력 방식 선택
-            InsertMethod method = view.selectInsertMethod();
+            // 3. 현재 데이터 미리보기 (전체 데이터 표시)
+            QueryResult preview = service.executeSelect(tableName, null);
+            view.showDataPreview(preview, -1); // -1로 전체 데이터 표시
 
-            // 4. 데이터 입력 및 실행
-            CrudResult result;
-            if (method == InsertMethod.FULL_SQL) {
-                String sql = view.getFullInsertSQL();
-                result = service.executeInsertSql(sql);
-            } else {
-                String values = view.getInsertValues();
-                result = service.executeInsert(tableName, values);
+            // 4. VALUES 입력
+            String values = view.getInsertValues();
+            if (values == null) {
+                view.showCancelled();
+                return;
             }
 
-            // 5. 결과 표시
+            // 5. 실행
+            CrudResult result = service.executeInsert(tableName, values);
+
+            // 6. 결과 표시
             view.showCrudResult(result);
 
         } catch (Exception e) {
@@ -128,13 +129,22 @@ public class TableController {
             String tableName = view.selectTable(service.ALL_TABLES);
             if (tableName == null) return;
 
-            // 2. 현재 데이터 미리보기
+            // 2. 현재 데이터 미리보기 (전체 데이터 표시)
             QueryResult preview = service.executeSelect(tableName, null);
-            view.showDataPreview(preview, 5);
+            view.showDataPreview(preview, -1); // -1로 전체 데이터 표시
 
             // 3. SET 절과 WHERE 절 입력
             String setClause = view.getSetClause();
+            if (setClause == null) {
+                view.showCancelled();
+                return;
+            }
+            
             String whereClause = view.getWhereClause();
+            if (whereClause == null) {
+                view.showCancelled();
+                return;
+            }
 
             // 4. 실행
             CrudResult result = service.executeUpdate(tableName, setClause, whereClause);
@@ -156,12 +166,17 @@ public class TableController {
             String tableName = view.selectTable(service.ALL_TABLES);
             if (tableName == null) return;
 
-            // 2. 현재 데이터 미리보기
+            // 2. 현재 데이터 미리보기 (전체 데이터 표시)
             QueryResult preview = service.executeSelect(tableName, null);
-            view.showDataPreview(preview, 10);
+            view.showDataPreview(preview, -1); // -1로 전체 데이터 표시
 
             // 3. WHERE 절 입력
             String whereClause = view.getWhereClause();
+            if (whereClause == null) {
+                // 사용자가 WHERE 절 입력을 취소한 경우
+                view.showCancelled();
+                return;
+            }
 
             // 4. 최종 확인
             if (!view.confirmDelete(tableName, whereClause)) {
@@ -177,6 +192,7 @@ public class TableController {
 
         } catch (Exception e) {
             view.showError("삭제 실패: " + e.getMessage());
+            e.printStackTrace(); // 디버깅을 위해 스택 트레이스 출력
         }
     }
 }

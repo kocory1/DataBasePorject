@@ -17,7 +17,6 @@ import java.awt.event.WindowEvent;
 public class SwingAdminView extends JFrame implements AdminView {
     
     // 서브 View들
-    private SwingDatabaseView databaseView;
     private SwingTableView tableView;
     private SwingQueryView queryView;
     private SwingCamperDetailView camperDetailView;
@@ -44,7 +43,7 @@ public class SwingAdminView extends JFrame implements AdminView {
     }
     
     private void initializeSubViews() {
-        this.databaseView = new SwingDatabaseView();
+        // 서브 뷰들은 사용 시마다 새로 생성 (상태 초기화를 위해)
         this.tableView = new SwingTableView();
         this.queryView = new SwingQueryView();
         this.camperDetailView = new SwingCamperDetailView();
@@ -261,7 +260,8 @@ public class SwingAdminView extends JFrame implements AdminView {
     
     @Override
     public DatabaseView getDatabaseView() {
-        return databaseView;
+        // 매번 새로운 인스턴스를 생성하여 상태 초기화
+        return new SwingDatabaseView();
     }
     
     @Override

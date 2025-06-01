@@ -113,8 +113,57 @@ public class TableService {
      * DELETE 실행
      */
     public CrudResult executeDelete(String tableName, String whereCondition) throws SQLException {
-        String sql = "DELETE FROM " + tableName + " WHERE " + whereCondition;
-        return executeUpdate(sql);
+        CrudResult result = new CrudResult();
+        
+        try {
+            connection.setAutoCommit(false);
+            
+            // 외래키 체크 비활성화
+            try (Statement stmt = connection.createStatement()) {
+                stmt.executeUpdate("SET FOREIGN_KEY_CHECKS = 0");
+            }
+            
+            // 삭제 실행
+            String sql = "DELETE FROM " + tableName + " WHERE " + whereCondition;
+            try (Statement stmt = connection.createStatement()) {
+                int affectedRows = stmt.executeUpdate(sql);
+                result.setSql(sql);
+                result.setSuccess(true);
+                result.setAffectedRows(affectedRows);
+                result.setMessage("삭제 성공");
+            }
+            
+            // 외래키 체크 재활성화
+            try (Statement stmt = connection.createStatement()) {
+                stmt.executeUpdate("SET FOREIGN_KEY_CHECKS = 1");
+            }
+            
+            connection.commit();
+            
+        } catch (SQLException e) {
+            try {
+                connection.rollback();
+                // 롤백 시에도 외래키 체크 재활성화
+                try (Statement stmt = connection.createStatement()) {
+                    stmt.executeUpdate("SET FOREIGN_KEY_CHECKS = 1");
+                } catch (SQLException ignored) {}
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
+            
+            result.setSuccess(false);
+            result.setErrorMessage("삭제 실패: " + e.getMessage());
+            result.setErrorCode(e.getErrorCode());
+            throw e;
+        } finally {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        return result;
     }
 
     /**

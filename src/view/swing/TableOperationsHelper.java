@@ -118,8 +118,14 @@ public class TableOperationsHelper {
                 return;
             }
             
-            int count = Math.min(result.getRowCount(), limit);
-            messageHandler.accept(String.format("미리보기: 상위 %d개 행 표시 (전체 %d개)", count, result.getRowCount()));
+            // limit가 -1이면 전체 데이터 표시, 그렇지 않으면 제한
+            int count = (limit == -1) ? result.getRowCount() : Math.min(result.getRowCount(), limit);
+            
+            if (limit == -1) {
+                messageHandler.accept(String.format("전체 데이터: %d개 행 표시", result.getRowCount()));
+            } else {
+                messageHandler.accept(String.format("미리보기: 상위 %d개 행 표시 (전체 %d개)", count, result.getRowCount()));
+            }
             
             Vector<String> columns = new Vector<>(result.getColumnNames());
             Vector<Vector<Object>> data = new Vector<>();

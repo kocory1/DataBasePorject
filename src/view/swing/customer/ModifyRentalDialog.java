@@ -1,15 +1,24 @@
 package view.swing.customer;
 
-import User.dbConnect.Db1;               // ★ 수정: 기존 common.DBConnect → User.dbConnect.Db1
 import User.dao_user.RentalDAO;
+import User.dao_user.CamperDAO;
 import User.model.Rental;
+import User.model.Camper;
+import User.model.Period;
+import common.DBConnect;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
 
 /**
  * 회원 대여 수정 다이얼로그
@@ -31,7 +40,8 @@ public class ModifyRentalDialog extends JDialog {
     private JButton btnUpdateDate;
 
     // [캠핑카 변경] 탭
-    private JTextField tfNewCamperId;
+    private JTable availableCampersTable;
+    private DefaultTableModel availableCampersTableModel;
     private JButton btnUpdateCamper;
 
     // 하단: 취소 버튼
@@ -47,6 +57,7 @@ public class ModifyRentalDialog extends JDialog {
 
     // DAO
     private RentalDAO rentalDAO = new RentalDAO();
+    private CamperDAO camperDAO = new CamperDAO();
 
     /**
      * 생성자
@@ -68,7 +79,7 @@ public class ModifyRentalDialog extends JDialog {
         this.currentLicense = license;
 
         initComponents();
-        // 기존 레이아웃에 맞춰 기존 예약 정보를 보여주려면, 여기서 DAO 호출 등을 추가하시면 됩니다.
+        loadAvailableCampers(); // 가능한 캠핑카 목록 로드
         pack();
         setLocationRelativeTo(parent);
     }
@@ -105,16 +116,30 @@ public class ModifyRentalDialog extends JDialog {
         // -------------------------------
         // 2) 캠핑카 변경 탭
         // -------------------------------
-        JPanel panelCamper = new JPanel(new GridLayout(2, 2, 5, 5));
+        JPanel panelCamper = new JPanel(new BorderLayout(5, 5));
         panelCamper.setBorder(BorderFactory.createTitledBorder("캠핑카 변경"));
 
-        panelCamper.add(new JLabel("새 캠핑카 ID:"));
-        tfNewCamperId = new JTextField();
-        panelCamper.add(tfNewCamperId);
+        // 가능한 캠핑카 목록 테이블
+        availableCampersTableModel = new DefaultTableModel(
+            new Object[] { "캠핑카 ID", "이름", "차량번호", "좌석수", "대여요금" }, 0
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        availableCampersTable = new JTable(availableCampersTableModel);
+        availableCampersTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JScrollPane campersScroll = new JScrollPane(availableCampersTable);
+        campersScroll.setPreferredSize(new Dimension(450, 200));
+        
+        panelCamper.add(new JLabel("현재 일정에 예약 가능한 캠핑카:"), BorderLayout.NORTH);
+        panelCamper.add(campersScroll, BorderLayout.CENTER);
 
-        btnUpdateCamper = new JButton("캠핑카 변경");
-        panelCamper.add(btnUpdateCamper);
-        panelCamper.add(new JLabel("")); // 빈 셀 채우기
+        btnUpdateCamper = new JButton("선택한 캠핑카로 변경");
+        JPanel camperButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        camperButtonPanel.add(btnUpdateCamper);
+        panelCamper.add(camperButtonPanel, BorderLayout.SOUTH);
 
         tabbedPane.addTab("캠핑카 변경", panelCamper);
 
@@ -156,6 +181,7 @@ public class ModifyRentalDialog extends JDialog {
     /**
      * 대여 일정(시작일, 기간, 납입기한) 수정 처리
      * ★ 기존 Date.valueOf(...) 부분을 SimpleDateFormat → java.sql.Date 변환으로 교체
+     * ★ 기존 대여를 제외한 중복 체크 로직 추가
      */
     private void updateRentalDate() {
         String dateText = tfNewStartDate.getText().trim();
@@ -207,22 +233,21 @@ public class ModifyRentalDialog extends JDialog {
             return;
         }
 
-        // 중복 검사 (예: getCurrentCamperId()는 DB에서 조회해야 함)
+        // ★ 개선된 중복 검사 (현재 수정 중인 대여 제외)
         try {
             int camperId = getCurrentCamperId();
-            boolean overlap = rentalDAO.isOverlapping(camperId, newStartDate, newPeriod);
+            boolean overlap = isOverlappingExcludingCurrent(camperId, newStartDate, newPeriod, rentalId);
+            
             if (overlap) {
-                JOptionPane.showMessageDialog(this,
-                        "이미 예약된 기간과 겹칩니다.",
-                        "중복 예약",
-                        JOptionPane.WARNING_MESSAGE);
+                // 단순히 불가능하다고 알려주고, 예약된 기간 정보 표시
+                showReservedPeriodsDialog(camperId, "선택한 기간은 다른 예약과 겹칩니다.");
                 return;
             }
 
-            // 실제 수정 수행
+            // 중복이 없으면 기존 방식대로 업데이트
             boolean success = rentalDAO.updateRentalDate(rentalId, currentLicense, newStartDate, newPeriod, newPaymentDueDate);
             if (success) {
-                rentalModified = true;  // 필드가 없었다면 아래에 선언 추가
+                rentalModified = true;
                 JOptionPane.showMessageDialog(this,
                         "대여 일정이 수정되었습니다.",
                         "수정 완료",
@@ -244,50 +269,40 @@ public class ModifyRentalDialog extends JDialog {
     }
 
     /**
-     * 대여 캠핑카 ID만 변경 처리
+     * 대여 캠핑카 변경 처리 (테이블에서 선택한 캠핑카로)
      */
     private void updateRentalCamper() {
-        String camperIdText = tfNewCamperId.getText().trim();
-        if (camperIdText.isEmpty()) {
+        int selectedRow = availableCampersTable.getSelectedRow();
+        if (selectedRow < 0) {
             JOptionPane.showMessageDialog(this,
-                    "새 캠핑카 ID를 입력해주세요.",
-                    "입력 오류",
+                    "변경할 캠핑카를 선택해주세요.",
+                    "선택 오류",
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        int newCamperId;
+        // 테이블에서 선택된 캠핑카 ID 가져오기
+        int newCamperId = (Integer) availableCampersTableModel.getValueAt(selectedRow, 0);
+        
         try {
-            newCamperId = Integer.parseInt(camperIdText);
-        } catch (NumberFormatException ne) {
-            JOptionPane.showMessageDialog(this,
-                    "캠핑카 ID는 숫자로만 입력해야 합니다.",
-                    "입력 오류",
-                    JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        // 중복 검사: 기존 대여 일정(startDate, period)을 알아야 함
-        try {
-            java.sql.Date existingStartDate = getExistingStartDate();
-            int existingPeriod = getExistingPeriod();
-
-            boolean overlap = rentalDAO.isOverlapping(newCamperId, existingStartDate, existingPeriod);
-            if (overlap) {
+            // 현재 캠핑카와 같은지 확인
+            int currentCamperId = getCurrentCamperId();
+            if (currentCamperId == newCamperId) {
                 JOptionPane.showMessageDialog(this,
-                        "새 캠핑카 ID가 해당 일정과 겹치는 예약이 있습니다.",
-                        "중복 예약",
-                        JOptionPane.WARNING_MESSAGE);
+                        "현재 캠핑카와 동일한 캠핑카입니다.",
+                        "변경 불필요",
+                        JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
 
-            // 실제 수정 수행
+            // 선택된 캠핑카로 변경 (이미 가능한 캠핑카만 표시했으므로 중복 체크 불필요)
             boolean success = rentalDAO.updateRentalCamper(rentalId, currentLicense, newCamperId);
             if (success) {
-                rentalModified = true;  // 필드가 없었다면 아래에 선언 추가
+                rentalModified = true;
+                String camperName = (String) availableCampersTableModel.getValueAt(selectedRow, 1);
                 JOptionPane.showMessageDialog(this,
-                        "캠핑카가 변경되었습니다.",
-                        "수정 완료",
+                        "캠핑카가 '" + camperName + "'로 변경되었습니다.",
+                        "변경 완료",
                         JOptionPane.INFORMATION_MESSAGE);
                 dispose();
             } else {
@@ -299,7 +314,59 @@ public class ModifyRentalDialog extends JDialog {
         } catch (Exception ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(this,
-                    "수정 중 오류 발생: " + ex.getMessage(),
+                    "변경 중 오류 발생: " + ex.getMessage(),
+                    "오류",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * 현재 일정에 예약 가능한 캠핑카 목록을 로드
+     */
+    private void loadAvailableCampers() {
+        try {
+            // 현재 대여의 시작일과 기간 조회
+            java.sql.Date startDate = getExistingStartDate();
+            int period = getExistingPeriod();
+            
+            // 해당 기간에 가능한 캠핑카 목록 조회
+            List<Camper> availableCampers = camperDAO.getAvailableCampers(startDate, period);
+            
+            // 현재 캠핑카도 목록에 추가 (자기 자신은 당연히 가능)
+            int currentCamperId = getCurrentCamperId();
+            Camper currentCamper = camperDAO.getCamperById(currentCamperId);
+            if (currentCamper != null) {
+                // 중복 체크 후 추가
+                boolean alreadyExists = availableCampers.stream()
+                    .anyMatch(c -> c.getCamperId() == currentCamperId);
+                if (!alreadyExists) {
+                    availableCampers.add(0, currentCamper); // 맨 앞에 추가
+                }
+            }
+            
+            // 테이블에 데이터 설정
+            availableCampersTableModel.setRowCount(0);
+            for (Camper camper : availableCampers) {
+                Object[] row = {
+                    camper.getCamperId(),
+                    camper.getName(),
+                    camper.getVehicleNumber(),
+                    camper.getSeats(),
+                    String.format("%.0f원", camper.getRentalFee())
+                };
+                availableCampersTableModel.addRow(row);
+                
+                // 현재 캠핑카라면 선택 상태로 설정
+                if (camper.getCamperId() == currentCamperId) {
+                    int rowIndex = availableCampersTableModel.getRowCount() - 1;
+                    availableCampersTable.setRowSelectionInterval(rowIndex, rowIndex);
+                }
+            }
+            
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                    "가능한 캠핑카 목록을 불러오는 중 오류 발생: " + ex.getMessage(),
                     "오류",
                     JOptionPane.ERROR_MESSAGE);
         }
@@ -311,39 +378,123 @@ public class ModifyRentalDialog extends JDialog {
     }
 
     // -----------------------------------------------
-    // 아래 두 메서드는 실제 DB 조회 로직을 구현해야 합니다.
-    // 예시로 간단하게 stub(임시값) 형태로 작성했습니다.
+    // 헬퍼 메서드들
     // -----------------------------------------------
 
     /**
-     * 기존 대여의 camper_id를 반환해야 함.
-     * 실제로는 RentalDAO 등을 통해 DB 조회하여 리턴.
+     * 현재 수정 중인 대여를 제외하고 중복 체크
      */
-    private int getCurrentCamperId() {
-        // TODO: DB에서 rentalId에 해당하는 레코드를 조회하여 camper_id를 반환
-        return 0;
+    private boolean isOverlappingExcludingCurrent(int camperId, java.sql.Date startDate, int period, int excludeRentalId) throws SQLException {
+        String sql = ""
+            + "SELECT COUNT(*) AS cnt "
+            + "FROM Rental "
+            + "WHERE camper_id = ? "
+            + "  AND rental_id != ? "
+            + "  AND NOT ( DATE_ADD(rental_start_date, INTERVAL rental_period DAY) < ? "
+            + "            OR rental_start_date > DATE_ADD(?, INTERVAL ? DAY) )";
+
+        try (Connection conn = DBConnect.getUserConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, camperId);
+            pstmt.setInt(2, excludeRentalId);
+            pstmt.setDate(3, startDate);
+            pstmt.setDate(4, startDate);
+            pstmt.setInt(5, period);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("cnt") > 0;
+                }
+            }
+        }
+        return false;
     }
 
     /**
-     * 기존 대여의 시작일을 반환해야 함.
-     * 실제로는 DB에서 조회하여 반환.
+     * 예약된 기간 정보를 보여주는 다이얼로그
      */
-    private java.sql.Date getExistingStartDate() {
-        // TODO: DB에서 rentalId에 해당하는 레코드를 조회하여 rental_start_date를 반환
-        return new java.sql.Date(System.currentTimeMillis());
+    private void showReservedPeriodsDialog(int camperId, String message) {
+        try {
+            List<Period> periods = camperDAO.getRentalPeriodsForCamper(camperId);
+            
+            StringBuilder sb = new StringBuilder();
+            sb.append(message).append("\n\n");
+            sb.append("현재 예약된 기간:\n");
+            
+            if (periods.isEmpty()) {
+                sb.append("예약된 기간이 없습니다.");
+            } else {
+                for (Period p : periods) {
+                    sb.append("• ").append(p.getStartDate()).append(" ~ ").append(p.getEndDate()).append("\n");
+                }
+                sb.append("\n다른 날짜를 선택해 주세요.");
+            }
+            
+            JOptionPane.showMessageDialog(this,
+                    sb.toString(),
+                    "예약 불가",
+                    JOptionPane.WARNING_MESSAGE);
+                    
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this,
+                    message + "\n\n예약 기간 정보를 가져올 수 없습니다.",
+                    "예약 불가",
+                    JOptionPane.WARNING_MESSAGE);
+        }
     }
 
     /**
-     * 기존 대여의 기간을 반환해야 함.
-     * 실제로는 DB에서 조회하여 반환.
+     * 기존 대여의 camper_id를 반환
      */
-    private int getExistingPeriod() {
-        // TODO: DB에서 rentalId에 해당하는 레코드를 조회하여 rental_period를 반환
-        return 1;
+    private int getCurrentCamperId() throws SQLException {
+        String sql = "SELECT camper_id FROM Rental WHERE rental_id = ?";
+        try (Connection conn = DBConnect.getUserConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, rentalId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("camper_id");
+                }
+            }
+        }
+        throw new SQLException("해당 렌탈 ID를 찾을 수 없습니다: " + rentalId);
     }
 
-    // -------------------------------
-    // 필드 선언이 누락되어 있었다면 아래를 추가하세요:
-    // private boolean rentalModified = false;
-    // -------------------------------
+    /**
+     * 기존 대여의 시작일을 반환
+     */
+    private java.sql.Date getExistingStartDate() throws SQLException {
+        String sql = "SELECT rental_start_date FROM Rental WHERE rental_id = ?";
+        try (Connection conn = DBConnect.getUserConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, rentalId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDate("rental_start_date");
+                }
+            }
+        }
+        throw new SQLException("해당 렌탈 ID를 찾을 수 없습니다: " + rentalId);
+    }
+
+    /**
+     * 기존 대여의 기간을 반환
+     */
+    private int getExistingPeriod() throws SQLException {
+        String sql = "SELECT rental_period FROM Rental WHERE rental_id = ?";
+        try (Connection conn = DBConnect.getUserConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, rentalId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("rental_period");
+                }
+            }
+        }
+        throw new SQLException("해당 렌탈 ID를 찾을 수 없습니다: " + rentalId);
+    }
 }

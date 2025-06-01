@@ -9,7 +9,7 @@ public class DBConnectTest {
 		try {
 			Class.forName("com.mysql.cj." +
 					"jdbc.Driver"); // MySQL 드라이버 로드
-			Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/DBTEST", "root","kingpin100"); // JDBC 연결
+			Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/camping_car_db", "root","kingpin100"); // JDBC 연결
 			System.out.println("DB 연결 완료");
 		} catch (ClassNotFoundException e) {
 			System.out.println("JDBC 드라이버 로드 오류");

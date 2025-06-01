@@ -1,11 +1,11 @@
 package view.swing.customer;
 
-import User.dbConnect.Db1;
 import User.dao_user.CamperDAO;
 import User.dao_user.RentalDAO;
 import User.model.Camper;
 import User.model.Period;
 import User.model.Rental;
+import common.DBConnect;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -289,6 +289,27 @@ public class RentalDialog extends JDialog {
             return;
         }
 
+        // 등록 전 충돌 체크 자동 수행
+        try {
+            boolean overlap = rentalDAO.isOverlapping(
+                selectedCamper.getCamperId(), startDate, period
+            );
+            if (overlap) {
+                JOptionPane.showMessageDialog(this,
+                        "선택한 기간은 이미 예약된 기간과 겹칩니다.\n다른 날짜를 선택해주세요.",
+                        "대여 불가",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                    "대여 가능 여부 확인 중 오류 발생: " + ex.getMessage(),
+                    "오류",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         // 납입기한 계산(예: 시작일 + (기간+1)일)
         long dueMillis = startDate.getTime() + (long)(period + 1) * 24 * 60 * 60 * 1000;
         java.sql.Date paymentDueDate = new java.sql.Date(dueMillis);
@@ -330,18 +351,20 @@ public class RentalDialog extends JDialog {
      */
     private int generateNewRentalId() {
         int newId = 1;
-        String sql = "SELECT MAX(rental_id) FROM Rental";
+        String sql = "SELECT COALESCE(MAX(rental_id), 0) + 1 FROM Rental";
         try (
-            Connection conn = Db1.getUserConnection();
+            Connection conn = DBConnect.getUserConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql);
             ResultSet rs = pstmt.executeQuery()
         ) {
             if (rs.next()) {
-                newId = rs.getInt(1) + 1;
+                newId = rs.getInt(1);
             }
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
-            newId = -1;
+            System.err.println("렌탈 ID 생성 중 오류: " + e.getMessage());
+            // 오류 발생 시에도 적절한 ID 생성을 위해 현재 시간을 이용한 임시 ID 생성
+            newId = (int)(System.currentTimeMillis() % 100000);
         }
         return newId;
     }

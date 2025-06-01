@@ -290,18 +290,8 @@ public class SwingTableView extends JFrame implements TableView {
     }
     
     @Override
-    public String getFullInsertSQL() {
-        return dialogHelper.getFullInsertSQL(null);
-    }
-    
-    @Override
     public String getInsertValues() {
         return dialogHelper.getInsertValues();
-    }
-    
-    @Override
-    public InsertMethod selectInsertMethod() {
-        return dialogHelper.selectInsertMethod();
     }
     
     @Override

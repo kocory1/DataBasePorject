@@ -162,11 +162,9 @@ public class CustomerMainView extends JFrame {
         );
         splitPane.setResizeWeight(0.7);
         
-        // 4) 버튼 패널 (기존)
+        // 4) 버튼 패널 (대여 신청 버튼만 남김)
         JPanel buttonPanel = new JPanel();
-        checkAvailabilityBtn = new JButton("대여 가능 확인");
         rentCamperBtn = new JButton("대여 신청");
-        buttonPanel.add(checkAvailabilityBtn);
         buttonPanel.add(rentCamperBtn);
         
         // 5) 레이아웃에 추가
@@ -262,13 +260,6 @@ public class CustomerMainView extends JFrame {
     }
     
     private void setupEventHandlers() {
-        checkAvailabilityBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                checkCamperAvailability();
-            }
-        });
-        
         rentCamperBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -382,30 +373,7 @@ public class CustomerMainView extends JFrame {
     }
     
     // ---------------------------------------------------------------
-    // 기존 메서드: 캠핑카 대여 가능 확인
-    // ---------------------------------------------------------------
-    private void checkCamperAvailability() {
-        int selectedRow = camperTable.getSelectedRow();
-        if (selectedRow == -1) {
-            MessageHelper.showWarningMessage(this, "캠핑카 선택", "대여 가능 여부를 확인할 캠핑카를 선택해주세요.");
-            return;
-        }
-        
-        int camperId = (int) camperTableModel.getValueAt(selectedRow, 0);
-        try {
-            boolean isAvailable = camperDAO.isAvailable(camperId);  // DAO 메서드 호출
-            if (isAvailable) {
-                MessageHelper.showInfoMessage(this, "대여 가능 확인", "선택한 캠핑카는 대여 가능합니다.");
-            } else {
-                MessageHelper.showWarningMessage(this, "대여 불가", "선택한 캠핑카는 이미 대여 중입니다.");
-            }
-        } catch (Exception e) {
-            MessageHelper.showErrorMessage(this, "대여 가능 확인 오류", e.getMessage());
-        }
-    }
-    
-    // ---------------------------------------------------------------
-    // 기존 메서드: 대여 신청 다이얼로그 표시
+    // 대여 신청 다이얼로그 표시 (충돌 체크는 다이얼로그에서 처리)
     // ---------------------------------------------------------------
     private void showRentalDialog() {
         int selectedRow = camperTable.getSelectedRow();
@@ -415,16 +383,6 @@ public class CustomerMainView extends JFrame {
         }
         
         int camperId = (int) camperTableModel.getValueAt(selectedRow, 0);
-        try {
-            boolean isAvailable = camperDAO.isAvailable(camperId);
-            if (!isAvailable) {
-                MessageHelper.showWarningMessage(this, "대여 불가", "선택한 캠핑카는 이미 대여 중입니다.");
-                return;
-            }
-        } catch (Exception e) {
-            MessageHelper.showErrorMessage(this, "대여 가능 확인 오류", e.getMessage());
-            return;
-        }
         
         // RentalDialog는 (JFrame, Camper, String) 생성자만 제공하므로,
         // camperTable에서 선택된 행의 정보를 이용해서 Camper 객체를 만들어야 합니다.

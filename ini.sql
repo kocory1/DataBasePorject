@@ -1,14 +1,13 @@
 
 
 -- 1. DB 삭제 및 생성
-DROP DATABASE IF EXISTS camping_car_db;
-CREATE DATABASE camping_car_db;
-USE camping_car_db;
+DROP DATABASE IF EXISTS DBTEST;
+CREATE DATABASE DBTEST;
+USE DBTEST;
 
 -- 2. 사용자 생성 및 권한 부여
 DROP USER IF EXISTS 'user1'@'localhost';
 CREATE USER 'user1'@'localhost' IDENTIFIED BY 'user1';
-GRANT SELECT, INSERT, UPDATE, DELETE ON camping_car_db.* TO 'user1'@'localhost';
 
 -- 3. 테이블 생성
 
@@ -126,132 +125,186 @@ FLUSH PRIVILEGES;
 
 -- 5. 샘플 데이터 삽입
 
-USE camping_car_db;
+USE DBTEST;
 
 -- 샘플 데이터 삽입
 
 -- RentalCompany
-INSERT INTO RentalCompany VALUES (1, '렌탈회사1', '서울시 강남구 1로', '010-1111-1001', '매니저1', 'manager1@rent.com');
-INSERT INTO RentalCompany VALUES (2, '렌탈회사2', '서울시 강남구 2로', '010-1111-1002', '매니저2', 'manager2@rent.com');
-INSERT INTO RentalCompany VALUES (3, '렌탈회사3', '서울시 강남구 3로', '010-1111-1003', '매니저3', 'manager3@rent.com');
-INSERT INTO RentalCompany VALUES (4, '렌탈회사4', '서울시 강남구 4로', '010-1111-1004', '매니저4', 'manager4@rent.com');
-INSERT INTO RentalCompany VALUES (5, '렌탈회사5', '서울시 강남구 5로', '010-1111-1005', '매니저5', 'manager5@rent.com');
-INSERT INTO RentalCompany VALUES (6, '렌탈회사6', '서울시 강남구 6로', '010-1111-1006', '매니저6', 'manager6@rent.com');
-INSERT INTO RentalCompany VALUES (7, '렌탈회사7', '서울시 강남구 7로', '010-1111-1007', '매니저7', 'manager7@rent.com');
-INSERT INTO RentalCompany VALUES (8, '렌탈회사8', '서울시 강남구 8로', '010-1111-1008', '매니저8', 'manager8@rent.com');
-INSERT INTO RentalCompany VALUES (9, '렌탈회사9', '서울시 강남구 9로', '010-1111-1009', '매니저9', 'manager9@rent.com');
-INSERT INTO RentalCompany VALUES (10, '렌탈회사10', '서울시 강남구 10로', '010-1111-1010', '매니저10', 'manager10@rent.com');
-INSERT INTO RentalCompany VALUES (11, '렌탈회사11', '서울시 강남구 11로', '010-1111-1011', '매니저11', 'manager11@rent.com');
-INSERT INTO RentalCompany VALUES (12, '렌탈회사12', '서울시 강남구 12로', '010-1111-1012', '매니저12', 'manager12@rent.com');
+INSERT INTO RentalCompany VALUES (1, '서울캠핑카렌탈', '서울시 강남구 테헤란로 123', '010-1111-1001', '김경영', 'kim@seoulcamping.com');
+INSERT INTO RentalCompany VALUES (2, '부산여행렌탈', '부산시 해운대구 해변로 456', '010-1111-1002', '이바다', 'lee@busantravel.com');
+INSERT INTO RentalCompany VALUES (3, '제주힐링캠핑', '제주시 연동 중앙로 789', '010-1111-1003', '박제주', 'park@jejuhealing.com');
+INSERT INTO RentalCompany VALUES (4, '강원산악캠핑', '강원도 춘천시 공지로 321', '010-1111-1004', '최산악', 'choi@gangwoncamp.com');
+INSERT INTO RentalCompany VALUES (5, '경기패밀리카', '경기도 수원시 영통로 654', '010-1111-1005', '정가족', 'jung@familycar.com');
+INSERT INTO RentalCompany VALUES (6, '전남해안렌탈', '전남 여수시 돌산로 987', '010-1111-1006', '황해안', 'hwang@jeonnamcoast.com');
+INSERT INTO RentalCompany VALUES (7, '충북내륙캠핑', '충북 청주시 상당로 147', '010-1111-1007', '오내륙', 'oh@chungbukcamp.com');
+INSERT INTO RentalCompany VALUES (8, '대구도심렌탈', '대구시 중구 국채보상로 258', '010-1111-1008', '류도심', 'ryu@daegurental.com');
+INSERT INTO RentalCompany VALUES (9, '인천공항렌탈', '인천시 중구 공항로 369', '010-1111-1009', '임공항', 'lim@airportrental.com');
+INSERT INTO RentalCompany VALUES (10, '울산산업렌탈', '울산시 남구 삼산로 741', '010-1111-1010', '권산업', 'kwon@ulsanrental.com');
+INSERT INTO RentalCompany VALUES (11, '광주호남렌탈', '광주시 서구 상무로 852', '010-1111-1011', '송호남', 'song@honamrental.com');
+INSERT INTO RentalCompany VALUES (12, '대전과학렌탈', '대전시 유성구 대학로 963', '010-1111-1012', '문과학', 'moon@sciencerental.com');
+INSERT INTO RentalCompany VALUES (13, '경남해변캠핑', '경남 통영시 바다로 123', '010-1111-1013', '조해변', 'cho@gyeongnambeach.com');
+INSERT INTO RentalCompany VALUES (14, '충남온천렌탈', '충남 아산시 온천로 456', '010-1111-1014', '한온천', 'han@hotspringrental.com');
+INSERT INTO RentalCompany VALUES (15, '전북산촌캠핑', '전북 전주시 한옥로 789', '010-1111-1015', '노산촌', 'no@jeonbukcamp.com');
 
 -- Camper
-INSERT INTO Camper VALUES (1, '캠핑카1', 'VN0001', 3, 'image1.jpg', '캠핑카 상세 정보1', 51000, 1, '2025-05-19');
-INSERT INTO Camper VALUES (2, '캠핑카2', 'VN0002', 4, 'image2.jpg', '캠핑카 상세 정보2', 52000, 2, '2025-05-16');
-INSERT INTO Camper VALUES (3, '캠핑카3', 'VN0003', 5, 'image3.jpg', '캠핑카 상세 정보3', 53000, 3, '2025-05-13');
-INSERT INTO Camper VALUES (4, '캠핑카4', 'VN0004', 6, 'image4.jpg', '캠핑카 상세 정보4', 54000, 4, '2025-05-10');
-INSERT INTO Camper VALUES (5, '캠핑카5', 'VN0005', 2, 'image5.jpg', '캠핑카 상세 정보5', 55000, 5, '2025-05-07');
-INSERT INTO Camper VALUES (6, '캠핑카6', 'VN0006', 3, 'image6.jpg', '캠핑카 상세 정보6', 56000, 6, '2025-05-04');
-INSERT INTO Camper VALUES (7, '캠핑카7', 'VN0007', 4, 'image7.jpg', '캠핑카 상세 정보7', 57000, 7, '2025-05-01');
-INSERT INTO Camper VALUES (8, '캠핑카8', 'VN0008', 5, 'image8.jpg', '캠핑카 상세 정보8', 58000, 8, '2025-04-28');
-INSERT INTO Camper VALUES (9, '캠핑카9', 'VN0009', 6, 'image9.jpg', '캠핑카 상세 정보9', 59000, 9, '2025-04-25');
-INSERT INTO Camper VALUES (10, '캠핑카10', 'VN0010', 2, 'image10.jpg', '캠핑카 상세 정보10', 60000, 10, '2025-04-22');
-INSERT INTO Camper VALUES (11, '캠핑카11', 'VN0011', 3, 'image11.jpg', '캠핑카 상세 정보11', 61000, 11, '2025-04-19');
-INSERT INTO Camper VALUES (12, '캠핑카12', 'VN0012', 4, 'image12.jpg', '캠핑카 상세 정보12', 62000, 12, '2025-04-16');
+INSERT INTO Camper VALUES (1, '가족형 대형캠핑카', 'VN0001', 6, 'family_large.jpg', '6인승 풀옵션 가족형 캠핑카, 침실2개, 화장실 완비', 80000, 1, '2025-01-15');
+INSERT INTO Camper VALUES (2, '커플형 소형캠핑카', 'VN0002', 2, 'couple_small.jpg', '2인승 커플 전용 캠핑카, 로맨틱한 인테리어', 55000, 2, '2025-01-20');
+INSERT INTO Camper VALUES (3, '모험가형 중형캠핑카', 'VN0003', 4, 'adventure_mid.jpg', '4인승 오프로드 전용 캠핑카, 견고한 설계', 70000, 3, '2025-02-01');
+INSERT INTO Camper VALUES (4, '럭셔리 프리미엄캠핑카', 'VN0004', 4, 'luxury_premium.jpg', '프리미엄 내장재, 최고급 사양의 4인승 캠핑카', 120000, 4, '2025-02-10');
+INSERT INTO Camper VALUES (5, '친환경 에코캠핑카', 'VN0005', 3, 'eco_friendly.jpg', '친환경 소재 3인승 캠핑카, 태양광 패널 장착', 65000, 5, '2025-02-20');
+INSERT INTO Camper VALUES (6, '스포츠형 캠핑카', 'VN0006', 4, 'sports_type.jpg', '스포츠 활동 특화 4인승 캠핑카, 장비 보관함 대형', 75000, 6, '2025-03-01');
+INSERT INTO Camper VALUES (7, '여행자형 장거리캠핑카', 'VN0007', 5, 'traveler_long.jpg', '장거리 여행 특화 5인승, 연료탱크 대용량', 85000, 7, '2025-03-10');
+INSERT INTO Camper VALUES (8, '캠핑초보자용 이지캠핑카', 'VN0008', 3, 'easy_beginner.jpg', '초보자도 쉽게 운전할 수 있는 3인승 캠핑카', 50000, 8, '2025-03-20');
+INSERT INTO Camper VALUES (9, '겨울특화 방한캠핑카', 'VN0009', 4, 'winter_special.jpg', '겨울철 방한 시설 완비 4인승 캠핑카', 90000, 9, '2025-04-01');
+INSERT INTO Camper VALUES (10, '펜션형 대형캠핑카', 'VN0010', 8, 'pension_large.jpg', '8인승 대형 펜션형 캠핑카, 거실공간 넓음', 100000, 10, '2025-04-10');
+INSERT INTO Camper VALUES (11, '바베큐특화 캠핑카', 'VN0011', 4, 'bbq_special.jpg', '바베큐 시설 특화 4인승 캠핑카', 70000, 11, '2025-04-20');
+INSERT INTO Camper VALUES (12, '반려동물동반 캠핑카', 'VN0012', 4, 'pet_friendly.jpg', '반려동물 동반 가능한 4인승 캠핑카', 65000, 12, '2025-05-01');
+INSERT INTO Camper VALUES (13, '낚시전용 캠핑카', 'VN0013', 3, 'fishing_special.jpg', '낚시 장비 보관 특화 3인승 캠핑카', 60000, 13, '2025-05-05');
+INSERT INTO Camper VALUES (14, '사진작가용 캠핑카', 'VN0014', 2, 'photographer.jpg', '사진 장비 보관 특화 2인승 캠핑카', 75000, 14, '2025-05-10');
+INSERT INTO Camper VALUES (15, '힐링테라피 캠핑카', 'VN0015', 3, 'healing_therapy.jpg', '힐링과 휴식 특화 3인승 캠핑카', 80000, 15, '2025-05-15');
 
 -- Part
-INSERT INTO Part VALUES (1, '부품1', 1050, 21, '2025-05-21', '공급사1');
-INSERT INTO Part VALUES (2, '부품2', 1100, 22, '2025-05-20', '공급사2');
-INSERT INTO Part VALUES (3, '부품3', 1150, 23, '2025-05-19', '공급사3');
-INSERT INTO Part VALUES (4, '부품4', 1200, 24, '2025-05-18', '공급사4');
-INSERT INTO Part VALUES (5, '부품5', 1250, 25, '2025-05-17', '공급사5');
-INSERT INTO Part VALUES (6, '부품6', 1300, 26, '2025-05-16', '공급사6');
-INSERT INTO Part VALUES (7, '부품7', 1350, 27, '2025-05-15', '공급사7');
-INSERT INTO Part VALUES (8, '부품8', 1400, 28, '2025-05-14', '공급사8');
-INSERT INTO Part VALUES (9, '부품9', 1450, 29, '2025-05-13', '공급사9');
-INSERT INTO Part VALUES (10, '부품10', 1500, 30, '2025-05-12', '공급사10');
-INSERT INTO Part VALUES (11, '부품11', 1550, 31, '2025-05-11', '공급사11');
-INSERT INTO Part VALUES (12, '부품12', 1600, 32, '2025-05-10', '공급사12');
+INSERT INTO Part VALUES (1, '엔진오일', 45000, 25, '2025-04-01', '모빌테크놀로지');
+INSERT INTO Part VALUES (2, '브레이크패드', 120000, 15, '2025-04-05', '브렘보코리아');
+INSERT INTO Part VALUES (3, '타이어', 180000, 20, '2025-04-10', '한국타이어');
+INSERT INTO Part VALUES (4, '배터리', 85000, 12, '2025-04-15', 'LG에너지솔루션');
+INSERT INTO Part VALUES (5, '에어필터', 35000, 30, '2025-04-20', '만필터코리아');
+INSERT INTO Part VALUES (6, '냉각수', 25000, 40, '2025-04-25', '쿨텍');
+INSERT INTO Part VALUES (7, '점화플러그', 15000, 50, '2025-05-01', 'NGK');
+INSERT INTO Part VALUES (8, '연료필터', 28000, 35, '2025-05-05', '만필터코리아');
+INSERT INTO Part VALUES (9, '벨트', 42000, 18, '2025-05-10', '게이츠코리아');
+INSERT INTO Part VALUES (10, '워셔액', 8000, 60, '2025-05-15', '소낙스');
+INSERT INTO Part VALUES (11, '미션오일', 55000, 22, '2025-05-20', '모빌테크놀로지');
+INSERT INTO Part VALUES (12, '쇼크업소버', 150000, 10, '2025-05-25', 'KYB');
+INSERT INTO Part VALUES (13, '헤드라이트', 95000, 14, '2025-05-30', '필립스');
+INSERT INTO Part VALUES (14, '와이퍼블레이드', 18000, 45, '2025-04-03', '보쉬');
+INSERT INTO Part VALUES (15, '연료호스', 32000, 25, '2025-04-08', '현대모비스');
 
 -- Employee
-INSERT INTO Employee VALUES (1, '직원1', '010-2222-2001', '서울시 중구 1길', 2230000, 1, '부서2', '사무');
-INSERT INTO Employee VALUES (2, '직원2', '010-2222-2002', '서울시 중구 2길', 2260000, 2, '부서3', '정비');
-INSERT INTO Employee VALUES (3, '직원3', '010-2222-2003', '서울시 중구 3길', 2290000, 0, '부서4', '관리');
-INSERT INTO Employee VALUES (4, '직원4', '010-2222-2004', '서울시 중구 4길', 2320000, 1, '부서1', '사무');
-INSERT INTO Employee VALUES (5, '직원5', '010-2222-2005', '서울시 중구 5길', 2350000, 2, '부서2', '정비');
-INSERT INTO Employee VALUES (6, '직원6', '010-2222-2006', '서울시 중구 6길', 2380000, 0, '부서3', '관리');
-INSERT INTO Employee VALUES (7, '직원7', '010-2222-2007', '서울시 중구 7길', 2410000, 1, '부서4', '사무');
-INSERT INTO Employee VALUES (8, '직원8', '010-2222-2008', '서울시 중구 8길', 2440000, 2, '부서1', '정비');
-INSERT INTO Employee VALUES (9, '직원9', '010-2222-2009', '서울시 중구 9길', 2470000, 0, '부서2', '관리');
-INSERT INTO Employee VALUES (10, '직원10', '010-2222-2010', '서울시 중구 10길', 2500000, 1, '부서3', '사무');
-INSERT INTO Employee VALUES (11, '직원11', '010-2222-2011', '서울시 중구 11길', 2530000, 2, '부서4', '정비');
-INSERT INTO Employee VALUES (12, '직원12', '010-2222-2012', '서울시 중구 12길', 2560000, 0, '부서1', '관리');
+INSERT INTO Employee VALUES (1, '김정비', '010-2222-2001', '서울시 중구 정비로 123', 2800000, 2, '정비부', '정비');
+INSERT INTO Employee VALUES (2, '이관리', '010-2222-2002', '서울시 중구 관리로 456', 3500000, 1, '관리부', '관리');
+INSERT INTO Employee VALUES (3, '박사무', '010-2222-2003', '서울시 중구 사무로 789', 2600000, 0, '사무부', '사무');
+INSERT INTO Employee VALUES (4, '최정비', '010-2222-2004', '부산시 해운대구 수리로 321', 2900000, 3, '정비부', '정비');
+INSERT INTO Employee VALUES (5, '정관리', '010-2222-2005', '부산시 해운대구 운영로 654', 3600000, 2, '관리부', '관리');
+INSERT INTO Employee VALUES (6, '한사무', '010-2222-2006', '대구시 중구 업무로 987', 2550000, 1, '사무부', '사무');
+INSERT INTO Employee VALUES (7, '오정비', '010-2222-2007', '인천시 중구 기술로 147', 3000000, 2, '정비부', '정비');
+INSERT INTO Employee VALUES (8, '황관리', '010-2222-2008', '광주시 서구 총괄로 258', 3700000, 1, '관리부', '관리');
+INSERT INTO Employee VALUES (9, '임사무', '010-2222-2009', '대전시 유성구 처리로 369', 2650000, 0, '사무부', '사무');
+INSERT INTO Employee VALUES (10, '권정비', '010-2222-2010', '울산시 남구 점검로 741', 2950000, 4, '정비부', '정비');
+INSERT INTO Employee VALUES (11, '송관리', '010-2222-2011', '제주시 연동 책임로 852', 3800000, 2, '관리부', '관리');
+INSERT INTO Employee VALUES (12, '문사무', '010-2222-2012', '강원도 춘천시 조정로 963', 2700000, 1, '사무부', '사무');
+INSERT INTO Employee VALUES (13, '조정비', '010-2222-2013', '경기도 수원시 전문로 159', 3100000, 3, '정비부', '정비');
+INSERT INTO Employee VALUES (14, '노관리', '010-2222-2014', '충남 아산시 총관로 753', 3900000, 1, '관리부', '관리');
+INSERT INTO Employee VALUES (15, '윤사무', '010-2222-2015', '전북 전주시 담당로 486', 2750000, 2, '사무부', '사무');
 
 -- Customer
-INSERT INTO Customer VALUES (1, 'user1', 'pass1', 'DL0001', '고객1', '서울시 종로구 1로', '010-3333-3001', 'user1@mail.com', '2025-05-18', '캠핑카2형');
-INSERT INTO Customer VALUES (2, 'user2', 'pass2', 'DL0002', '고객2', '서울시 종로구 2로', '010-3333-3002', 'user2@mail.com', '2025-05-14', '캠핑카3형');
-INSERT INTO Customer VALUES (3, 'user3', 'pass3', 'DL0003', '고객3', '서울시 종로구 3로', '010-3333-3003', 'user3@mail.com', '2025-05-10', '캠핑카4형');
-INSERT INTO Customer VALUES (4, 'user4', 'pass4', 'DL0004', '고객4', '서울시 종로구 4로', '010-3333-3004', 'user4@mail.com', '2025-05-06', '캠핑카1형');
-INSERT INTO Customer VALUES (5, 'user5', 'pass5', 'DL0005', '고객5', '서울시 종로구 5로', '010-3333-3005', 'user5@mail.com', '2025-05-02', '캠핑카2형');
-INSERT INTO Customer VALUES (6, 'user6', 'pass6', 'DL0006', '고객6', '서울시 종로구 6로', '010-3333-3006', 'user6@mail.com', '2025-04-28', '캠핑카3형');
-INSERT INTO Customer VALUES (7, 'user7', 'pass7', 'DL0007', '고객7', '서울시 종로구 7로', '010-3333-3007', 'user7@mail.com', '2025-04-24', '캠핑카4형');
-INSERT INTO Customer VALUES (8, 'user8', 'pass8', 'DL0008', '고객8', '서울시 종로구 8로', '010-3333-3008', 'user8@mail.com', '2025-04-20', '캠핑카1형');
-INSERT INTO Customer VALUES (9, 'user9', 'pass9', 'DL0009', '고객9', '서울시 종로구 9로', '010-3333-3009', 'user9@mail.com', '2025-04-16', '캠핑카2형');
-INSERT INTO Customer VALUES (10, 'user10', 'pass10', 'DL0010', '고객10', '서울시 종로구 10로', '010-3333-3010', 'user10@mail.com', '2025-04-12', '캠핑카3형');
-INSERT INTO Customer VALUES (11, 'user11', 'pass11', 'DL0011', '고객11', '서울시 종로구 11로', '010-3333-3011', 'user11@mail.com', '2025-04-08', '캠핑카4형');
-INSERT INTO Customer VALUES (12, 'user12', 'pass12', 'DL0012', '고객12', '서울시 종로구 12로', '010-3333-3012', 'user12@mail.com', '2025-04-04', '캠핑카1형');
+INSERT INTO Customer VALUES (1, 'camper_lee', 'pass123!', 'DL0001', '이영희', '서울시 종로구 세종대로 175', '010-3333-3001', 'younghee@naver.com', '2025-03-15', '가족형캠핑카');
+INSERT INTO Customer VALUES (2, 'travel_kim', 'kim2025@', 'DL0002', '김철수', '부산시 해운대구 우동 1533', '010-3333-3002', 'chulsu@gmail.com', '2025-03-20', '커플형캠핑카');
+INSERT INTO Customer VALUES (3, 'adventure_park', 'park!789', 'DL0003', '박모험', '대구시 중구 동성로 123', '010-3333-3003', 'adventure@hanmail.net', '2025-04-01', '모험가형캠핑카');
+INSERT INTO Customer VALUES (4, 'luxury_choi', 'luxury#456', 'DL0004', '최부자', '인천시 연수구 송도동 999', '010-3333-3004', 'luxury@daum.net', '2025-04-10', '럭셔리캠핑카');
+INSERT INTO Customer VALUES (5, 'eco_jung', 'eco2025$', 'DL0005', '정환경', '광주시 서구 화정로 567', '010-3333-3005', 'eco.jung@outlook.com', '2025-04-15', '친환경캠핑카');
+INSERT INTO Customer VALUES (6, 'sports_han', 'sports321*', 'DL0006', '한운동', '대전시 유성구 과학로 890', '010-3333-3006', 'sports.han@yahoo.com', '2025-04-20', '스포츠형캠핑카');
+INSERT INTO Customer VALUES (7, 'travel_oh', 'travel987&', 'DL0007', '오여행', '울산시 남구 삼산로 234', '010-3333-3007', 'travel.oh@hotmail.com', '2025-05-01', '장거리캠핑카');
+INSERT INTO Customer VALUES (8, 'easy_hwang', 'easy654%', 'DL0008', '황초보', '경기도 수원시 팔달구 인계로 456', '010-3333-3008', 'easy.hwang@nate.com', '2025-05-05', '초보자용캠핑카');
+INSERT INTO Customer VALUES (9, 'winter_lim', 'winter123^', 'DL0009', '임겨울', '강원도 춘천시 중앙로 789', '010-3333-3009', 'winter.lim@gmail.com', '2025-05-10', '방한캠핑카');
+INSERT INTO Customer VALUES (10, 'family_kwon', 'family456&', 'DL0010', '권대가족', '제주시 연동 중앙로 321', '010-3333-3010', 'family.kwon@naver.com', '2025-05-12', '펜션형캠핑카');
+INSERT INTO Customer VALUES (11, 'bbq_song', 'bbq789*', 'DL0011', '송바베큐', '충남 아산시 온천로 654', '010-3333-3011', 'bbq.song@daum.net', '2025-05-15', '바베큐캠핑카');
+INSERT INTO Customer VALUES (12, 'pet_moon', 'pet321!', 'DL0012', '문반려', '전북 전주시 한옥마을길 987', '010-3333-3012', 'pet.moon@hanmail.net', '2025-05-18', '반려동물캠핑카');
+INSERT INTO Customer VALUES (13, 'fish_cho', 'fish654@', 'DL0013', '조낚시', '경남 통영시 바다로 147', '010-3333-3013', 'fish.cho@outlook.com', '2025-05-20', '낚시캠핑카');
+INSERT INTO Customer VALUES (14, 'photo_han', 'photo987#', 'DL0014', '한사진', '충북 청주시 상당로 258', '010-3333-3014', 'photo.han@yahoo.com', '2025-05-22', '사진가캠핑카');
+INSERT INTO Customer VALUES (15, 'healing_no', 'healing123$', 'DL0015', '노힐링', '전남 여수시 돌산로 369', '010-3333-3015', 'healing.no@hotmail.com', '2025-05-25', '힐링캠핑카');
 
--- Rental
-INSERT INTO Rental VALUES (1, 1, 'DL0001', 1, '2025-05-17', 2, 103000, '2025-05-18', '기타요금1', 3100);
-INSERT INTO Rental VALUES (2, 2, 'DL0002', 2, '2025-05-12', 3, 106000, '2025-05-13', '기타요금2', 3200);
-INSERT INTO Rental VALUES (3, 3, 'DL0003', 3, '2025-05-07', 4, 109000, '2025-05-08', '기타요금3', 3300);
-INSERT INTO Rental VALUES (4, 4, 'DL0004', 4, '2025-05-02', 5, 112000, '2025-05-03', '기타요금4', 3400);
-INSERT INTO Rental VALUES (5, 5, 'DL0005', 5, '2025-04-27', 6, 115000, '2025-04-28', '기타요금5', 3500);
-INSERT INTO Rental VALUES (6, 6, 'DL0006', 6, '2025-04-22', 7, 118000, '2025-04-23', '기타요금6', 3600);
-INSERT INTO Rental VALUES (7, 7, 'DL0007', 7, '2025-04-17', 8, 121000, '2025-04-18', '기타요금7', 3700);
-INSERT INTO Rental VALUES (8, 8, 'DL0008', 8, '2025-04-12', 9, 124000, '2025-04-13', '기타요금8', 3800);
-INSERT INTO Rental VALUES (9, 9, 'DL0009', 9, '2025-04-07', 10, 127000, '2025-04-08', '기타요금9', 3900);
-INSERT INTO Rental VALUES (10, 10, 'DL0010', 10, '2025-04-02', 1, 130000, '2025-04-03', '기타요금10', 4000);
-INSERT INTO Rental VALUES (11, 11, 'DL0011', 11, '2025-03-28', 2, 133000, '2025-03-29', '기타요금11', 4100);
-INSERT INTO Rental VALUES (12, 12, 'DL0012', 12, '2025-03-23', 3, 136000, '2025-03-24', '기타요금12', 4200);
+-- Rental (5월 중순부터 6월 말까지 더 많은 데이터)
+INSERT INTO Rental VALUES (1, 1, 'DL0001', 1, '2025-05-15', 3, 240000, '2025-05-14', '주말 할증료', 30000);
+INSERT INTO Rental VALUES (2, 2, 'DL0002', 2, '2025-05-18', 2, 110000, '2025-05-17', '청소비', 20000);
+INSERT INTO Rental VALUES (3, 3, 'DL0003', 3, '2025-05-22', 4, 280000, '2025-05-21', '연료비', 50000);
+INSERT INTO Rental VALUES (4, 4, 'DL0004', 4, '2025-05-25', 5, 600000, '2025-05-24', '보험료', 80000);
+INSERT INTO Rental VALUES (5, 5, 'DL0005', 5, '2025-05-28', 3, 195000, '2025-05-27', '장거리 할증', 25000);
+INSERT INTO Rental VALUES (6, 6, 'DL0006', 6, '2025-06-01', 2, 150000, '2025-05-31', '주말 할증료', 35000);
+INSERT INTO Rental VALUES (7, 7, 'DL0007', 7, '2025-06-05', 7, 595000, '2025-06-04', '연료비', 75000);
+INSERT INTO Rental VALUES (8, 8, 'DL0008', 8, '2025-06-08', 2, 100000, '2025-06-07', '청소비', 15000);
+INSERT INTO Rental VALUES (9, 9, 'DL0009', 9, '2025-06-12', 4, 360000, '2025-06-11', '겨울장비 대여', 40000);
+INSERT INTO Rental VALUES (10, 10, 'DL0010', 10, '2025-06-15', 6, 600000, '2025-06-14', '대형차 할증', 100000);
+INSERT INTO Rental VALUES (11, 11, 'DL0011', 11, '2025-06-18', 3, 210000, '2025-06-17', '바베큐 장비', 30000);
+INSERT INTO Rental VALUES (12, 12, 'DL0012', 12, '2025-06-22', 2, 130000, '2025-06-21', '펫케어비', 25000);
+INSERT INTO Rental VALUES (13, 13, 'DL0013', 13, '2025-06-25', 4, 240000, '2025-06-24', '낚시장비 대여', 35000);
+INSERT INTO Rental VALUES (14, 14, 'DL0014', 14, '2025-06-28', 2, 150000, '2025-06-27', '사진장비 보험', 20000);
+INSERT INTO Rental VALUES (15, 15, 'DL0015', 15, '2025-06-30', 3, 240000, '2025-06-29', '힐링패키지', 40000);
+INSERT INTO Rental VALUES (16, 1, 'DL0003', 1, '2025-05-20', 2, 160000, '2025-05-15', '조기예약 할인', -10000);
+INSERT INTO Rental VALUES (17, 3, 'DL0005', 3, '2025-05-20', 5, 350000, '2025-05-19', '장기대여 할인', -20000);
+INSERT INTO Rental VALUES (18, 5, 'DL0007', 5, '2025-06-03', 3, 195000, '2025-06-02', '친환경 할인', -15000);
+INSERT INTO Rental VALUES (19, 8, 'DL0010', 8, '2025-06-10', 4, 200000, '2025-06-09', '초보자 패키지', 25000);
+INSERT INTO Rental VALUES (20, 12, 'DL0015', 12, '2025-06-20', 5, 325000, '2025-06-19', '반려동물 케어', 50000);
 
--- InternalMaintenance
-INSERT INTO InternalMaintenance VALUES (1, 1, 1, '2025-05-20', 31, 1);
-INSERT INTO InternalMaintenance VALUES (2, 2, 2, '2025-05-18', 32, 2);
-INSERT INTO InternalMaintenance VALUES (3, 3, 3, '2025-05-16', 33, 3);
-INSERT INTO InternalMaintenance VALUES (4, 4, 4, '2025-05-14', 34, 4);
-INSERT INTO InternalMaintenance VALUES (5, 5, 5, '2025-05-12', 35, 5);
-INSERT INTO InternalMaintenance VALUES (6, 6, 6, '2025-05-10', 36, 6);
-INSERT INTO InternalMaintenance VALUES (7, 7, 7, '2025-05-08', 37, 7);
-INSERT INTO InternalMaintenance VALUES (8, 8, 8, '2025-05-06', 38, 8);
-INSERT INTO InternalMaintenance VALUES (9, 9, 9, '2025-05-04', 39, 9);
-INSERT INTO InternalMaintenance VALUES (10, 10, 10, '2025-05-02', 40, 10);
-INSERT INTO InternalMaintenance VALUES (11, 11, 11, '2025-04-30', 41, 11);
-INSERT INTO InternalMaintenance VALUES (12, 12, 12, '2025-04-28', 42, 12);
+-- InternalMaintenance (4~5월 사이 정비 기록)
+INSERT INTO InternalMaintenance VALUES (1, 1, 1, '2025-04-05', 120, 1);
+INSERT INTO InternalMaintenance VALUES (2, 2, 2, '2025-04-08', 180, 4);
+INSERT INTO InternalMaintenance VALUES (3, 3, 3, '2025-04-12', 240, 7);
+INSERT INTO InternalMaintenance VALUES (4, 4, 4, '2025-04-15', 90, 10);
+INSERT INTO InternalMaintenance VALUES (5, 5, 5, '2025-04-18', 150, 13);
+INSERT INTO InternalMaintenance VALUES (6, 6, 6, '2025-04-22', 200, 2);
+INSERT INTO InternalMaintenance VALUES (7, 7, 7, '2025-04-25', 110, 5);
+INSERT INTO InternalMaintenance VALUES (8, 8, 8, '2025-04-28', 160, 8);
+INSERT INTO InternalMaintenance VALUES (9, 9, 9, '2025-05-02', 135, 11);
+INSERT INTO InternalMaintenance VALUES (10, 10, 10, '2025-05-05', 210, 1);
+INSERT INTO InternalMaintenance VALUES (11, 11, 11, '2025-05-08', 180, 4);
+INSERT INTO InternalMaintenance VALUES (12, 12, 12, '2025-05-12', 145, 7);
+INSERT INTO InternalMaintenance VALUES (13, 13, 13, '2025-05-15', 120, 10);
+INSERT INTO InternalMaintenance VALUES (14, 14, 14, '2025-05-18', 190, 13);
+INSERT INTO InternalMaintenance VALUES (15, 15, 15, '2025-05-22', 165, 2);
+INSERT INTO InternalMaintenance VALUES (16, 1, 3, '2025-04-10', 90, 5);
+INSERT INTO InternalMaintenance VALUES (17, 5, 7, '2025-04-20', 75, 8);
 
 -- ExternalMaintenanceShop
-INSERT INTO ExternalMaintenanceShop VALUES (1, '정비소1', '경기도 수원시 1길', '031-444-4001', '담당자1', 'repair1@shop.com');
-INSERT INTO ExternalMaintenanceShop VALUES (2, '정비소2', '경기도 수원시 2길', '031-444-4002', '담당자2', 'repair2@shop.com');
-INSERT INTO ExternalMaintenanceShop VALUES (3, '정비소3', '경기도 수원시 3길', '031-444-4003', '담당자3', 'repair3@shop.com');
-INSERT INTO ExternalMaintenanceShop VALUES (4, '정비소4', '경기도 수원시 4길', '031-444-4004', '담당자4', 'repair4@shop.com');
-INSERT INTO ExternalMaintenanceShop VALUES (5, '정비소5', '경기도 수원시 5길', '031-444-4005', '담당자5', 'repair5@shop.com');
-INSERT INTO ExternalMaintenanceShop VALUES (6, '정비소6', '경기도 수원시 6길', '031-444-4006', '담당자6', 'repair6@shop.com');
-INSERT INTO ExternalMaintenanceShop VALUES (7, '정비소7', '경기도 수원시 7길', '031-444-4007', '담당자7', 'repair7@shop.com');
-INSERT INTO ExternalMaintenanceShop VALUES (8, '정비소8', '경기도 수원시 8길', '031-444-4008', '담당자8', 'repair8@shop.com');
-INSERT INTO ExternalMaintenanceShop VALUES (9, '정비소9', '경기도 수원시 9길', '031-444-4009', '담당자9', 'repair9@shop.com');
-INSERT INTO ExternalMaintenanceShop VALUES (10, '정비소10', '경기도 수원시 10길', '031-444-4010', '담당자10', 'repair10@shop.com');
-INSERT INTO ExternalMaintenanceShop VALUES (11, '정비소11', '경기도 수원시 11길', '031-444-4011', '담당자11', 'repair11@shop.com');
-INSERT INTO ExternalMaintenanceShop VALUES (12, '정비소12', '경기도 수원시 12길', '031-444-4012', '담당자12', 'repair12@shop.com');
+INSERT INTO ExternalMaintenanceShop VALUES (1, '서울정비센터', '서울시 강남구 테헤란로 456', '02-555-0001', '김정비', 'kim@seoulservice.com');
+INSERT INTO ExternalMaintenanceShop VALUES (2, '부산오토케어', '부산시 해운대구 센텀로 789', '051-555-0002', '이수리', 'lee@busanauto.com');
+INSERT INTO ExternalMaintenanceShop VALUES (3, '대구모터스', '대구시 중구 달구벌대로 321', '053-555-0003', '박엔진', 'park@daegumotor.com');
+INSERT INTO ExternalMaintenanceShop VALUES (4, '인천카서비스', '인천시 연수구 컨벤시아대로 654', '032-555-0004', '최브레이크', 'choi@incheoncar.com');
+INSERT INTO ExternalMaintenanceShop VALUES (5, '광주정비공업', '광주시 서구 상무중앙로 987', '062-555-0005', '정타이어', 'jung@gwangjurepair.com');
+INSERT INTO ExternalMaintenanceShop VALUES (6, '대전테크센터', '대전시 유성구 과학로 147', '042-555-0006', '한배터리', 'han@daejeontech.com');
+INSERT INTO ExternalMaintenanceShop VALUES (7, '울산산업정비', '울산시 남구 산업로 258', '052-555-0007', '오오일', 'oh@ulsanindust.com');
+INSERT INTO ExternalMaintenanceShop VALUES (8, '경기오토', '경기도 수원시 영통구 광교로 369', '031-555-0008', '황필터', 'hwang@gyeonggiauto.com');
+INSERT INTO ExternalMaintenanceShop VALUES (9, '강원정비소', '강원도 춘천시 중앙로 741', '033-555-0009', '임쇼크', 'lim@gangwonrepair.com');
+INSERT INTO ExternalMaintenanceShop VALUES (10, '제주카케어', '제주시 연동 중앙로 852', '064-555-0010', '권라이트', 'kwon@jejucar.com');
+INSERT INTO ExternalMaintenanceShop VALUES (11, '충남모터스', '충남 아산시 배방읍 고속도로 963', '041-555-0011', '송와이퍼', 'song@chungnammotor.com');
+INSERT INTO ExternalMaintenanceShop VALUES (12, '전북정비센터', '전북 전주시 덕진구 건산로 159', '063-555-0012', '문벨트', 'moon@jeonbukservice.com');
+INSERT INTO ExternalMaintenanceShop VALUES (13, '경남해안정비', '경남 통영시 무전동 해안로 753', '055-555-0013', '조냉각', 'cho@gyeongnamcoast.com');
+INSERT INTO ExternalMaintenanceShop VALUES (14, '충북산업정비', '충북 청주시 흥덕구 가경로 486', '043-555-0014', '노플러그', 'no@chungbukindust.com');
+INSERT INTO ExternalMaintenanceShop VALUES (15, '전남남도정비', '전남 목포시 하당로 592', '061-555-0015', '윤호스', 'yun@jeonnamnam.com');
 
--- ExternalMaintenance
-INSERT INTO ExternalMaintenance VALUES (1, 1, 1, 1, 'DL0001', '외부수리 내용1', '2025-05-20', 40700, '2025-05-21', '기타 외부 정비1');
-INSERT INTO ExternalMaintenance VALUES (2, 2, 2, 2, 'DL0002', '외부수리 내용2', '2025-05-18', 41400, '2025-05-19', '기타 외부 정비2');
-INSERT INTO ExternalMaintenance VALUES (3, 3, 3, 3, 'DL0003', '외부수리 내용3', '2025-05-16', 42100, '2025-05-17', '기타 외부 정비3');
-INSERT INTO ExternalMaintenance VALUES (4, 4, 4, 4, 'DL0004', '외부수리 내용4', '2025-05-14', 42800, '2025-05-15', '기타 외부 정비4');
-INSERT INTO ExternalMaintenance VALUES (5, 5, 5, 5, 'DL0005', '외부수리 내용5', '2025-05-12', 43500, '2025-05-13', '기타 외부 정비5');
-INSERT INTO ExternalMaintenance VALUES (6, 6, 6, 6, 'DL0006', '외부수리 내용6', '2025-05-10', 44200, '2025-05-11', '기타 외부 정비6');
-INSERT INTO ExternalMaintenance VALUES (7, 7, 7, 7, 'DL0007', '외부수리 내용7', '2025-05-08', 44900, '2025-05-09', '기타 외부 정비7');
-INSERT INTO ExternalMaintenance VALUES (8, 8, 8, 8, 'DL0008', '외부수리 내용8', '2025-05-06', 45600, '2025-05-07', '기타 외부 정비8');
-INSERT INTO ExternalMaintenance VALUES (9, 9, 9, 9, 'DL0009', '외부수리 내용9', '2025-05-04', 46300, '2025-05-05', '기타 외부 정비9');
-INSERT INTO ExternalMaintenance VALUES (10, 10, 10, 10, 'DL0010', '외부수리 내용10', '2025-05-02', 47000, '2025-05-03', '기타 외부 정비10');
-INSERT INTO ExternalMaintenance VALUES (11, 11, 11, 11, 'DL0011', '외부수리 내용11', '2025-04-30', 47700, '2025-05-01', '기타 외부 정비11');
-INSERT INTO ExternalMaintenance VALUES (12, 12, 12, 12, 'DL0012', '외부수리 내용12', '2025-04-28', 48400, '2025-04-29', '기타 외부 정비12');
+-- ExternalMaintenance (4~5월 사이 외부 정비 기록)
+INSERT INTO ExternalMaintenance VALUES (1, 1, 1, 1, 'DL0001', '엔진 오일 교환 및 필터 점검', '2025-04-07', 85000, '2025-04-14', '정기점검 포함');
+INSERT INTO ExternalMaintenance VALUES (2, 2, 2, 2, 'DL0002', '브레이크 패드 교체', '2025-04-10', 150000, '2025-04-17', '브레이크액 교환');
+INSERT INTO ExternalMaintenance VALUES (3, 3, 3, 3, 'DL0003', '타이어 4개 교체 및 휠 밸런싱', '2025-04-14', 320000, '2025-04-21', '타이어 정렬 포함');
+INSERT INTO ExternalMaintenance VALUES (4, 4, 4, 4, 'DL0004', '배터리 교체 및 충전 시스템 점검', '2025-04-17', 120000, '2025-04-24', '전기계통 점검');
+INSERT INTO ExternalMaintenance VALUES (5, 5, 5, 5, 'DL0005', '에어컨 필터 교체 및 가스 충전', '2025-04-21', 95000, '2025-04-28', '냉각시스템 청소');
+INSERT INTO ExternalMaintenance VALUES (6, 6, 6, 6, 'DL0006', '냉각수 교환 및 워터펌프 점검', '2025-04-24', 75000, '2025-05-01', '라디에이터 청소');
+INSERT INTO ExternalMaintenance VALUES (7, 7, 7, 7, 'DL0007', '점화플러그 교체 및 점화시스템 점검', '2025-04-28', 65000, '2025-05-05', '연비 개선 작업');
+INSERT INTO ExternalMaintenance VALUES (8, 8, 8, 8, 'DL0008', '연료필터 교체 및 인젝터 청소', '2025-05-02', 110000, '2025-05-09', '연료시스템 점검');
+INSERT INTO ExternalMaintenance VALUES (9, 9, 9, 9, 'DL0009', '타이밍벨트 교체', '2025-05-05', 280000, '2025-05-12', '워터펌프 동시교체');
+INSERT INTO ExternalMaintenance VALUES (10, 10, 10, 10, 'DL0010', '워셔액 보충 및 와이퍼 점검', '2025-05-08', 25000, '2025-05-15', '유리세정 시스템 점검');
+INSERT INTO ExternalMaintenance VALUES (11, 11, 11, 11, 'DL0011', '미션오일 교환', '2025-05-12', 85000, '2025-05-19', '변속기 점검');
+INSERT INTO ExternalMaintenance VALUES (12, 12, 12, 12, 'DL0012', '쇼크업소버 교체', '2025-05-15', 200000, '2025-05-22', '서스펜션 점검');
+INSERT INTO ExternalMaintenance VALUES (13, 13, 13, 13, 'DL0013', '헤드라이트 교체 및 조정', '2025-05-18', 130000, '2025-05-25', '전조등 점검');
+INSERT INTO ExternalMaintenance VALUES (14, 14, 14, 14, 'DL0014', '와이퍼블레이드 교체', '2025-05-21', 35000, '2025-05-28', '우천시 안전점검');
+INSERT INTO ExternalMaintenance VALUES (15, 15, 15, 15, 'DL0015', '연료호스 교체 및 연료계통 점검', '2025-05-24', 75000, '2025-05-31', '연료누출 방지');
+
+-- 캠핑카 대여 예약에 필요한 테이블에 대해서만 권한 부여
+-- 1) 캠핑카 조회를 위한 테이블들
+GRANT SELECT ON DBTEST.Camper TO 'user1'@'localhost';
+GRANT SELECT ON DBTEST.RentalCompany TO 'user1'@'localhost';
+
+-- 2) 고객 관리를 위한 테이블
+GRANT SELECT, INSERT, UPDATE, DELETE ON DBTEST.Customer TO 'user1'@'localhost';
+
+-- 3) 대여 관리를 위한 테이블
+GRANT SELECT, INSERT, UPDATE, DELETE ON DBTEST.Rental TO 'user1'@'localhost';
+
+-- 4) 외부 정비 관련 테이블 (회원이 외부 정비 요청할 수 있음)
+GRANT SELECT ON DBTEST.ExternalMaintenanceShop TO 'user1'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE ON DBTEST.ExternalMaintenance TO 'user1'@'localhost';
+
+-- 주의: 다음 테이블들은 관리자 전용이므로 user1에게 권한 부여하지 않음
+-- - Part (부품 재고 관리)
+-- - Employee (직원 관리)  
+-- - InternalMaintenance (자체 정비 관리)

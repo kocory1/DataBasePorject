@@ -52,6 +52,10 @@ public class SwingDatabaseView extends JDialog implements DatabaseView {
         
         confirmButton.setPreferredSize(new Dimension(100, 30));
         cancelButton.setPreferredSize(new Dimension(100, 30));
+        
+        // 버튼 초기 상태 명시적 설정
+        confirmButton.setEnabled(true);
+        cancelButton.setEnabled(true);
     }
     
     private void setupLayout() {
@@ -124,6 +128,11 @@ public class SwingDatabaseView extends JDialog implements DatabaseView {
     @Override
     public boolean confirmInitialization() {
         SwingUtilities.invokeLater(() -> {
+            // 버튼 상태 초기화 (혹시 이전 상태가 남아있을 경우를 대비)
+            confirmButton.setEnabled(true);
+            cancelButton.setEnabled(true);
+            cancelButton.setText("취소");
+            
             setVisible(true);
             logArea.append("🤔 사용자 확인을 기다리고 있습니다...\n");
         });
@@ -171,14 +180,7 @@ public class SwingDatabaseView extends JDialog implements DatabaseView {
             JOptionPane.showMessageDialog(this, message, "초기화 완료", JOptionPane.INFORMATION_MESSAGE);
             
             // 창 닫기
-            Timer timer = new Timer(1000, new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    dispose();
-                }
-            });
-            timer.setRepeats(false);
-            timer.start();
+            dispose();
         });
     }
     
@@ -197,9 +199,8 @@ public class SwingDatabaseView extends JDialog implements DatabaseView {
             // 오류 알림
             JOptionPane.showMessageDialog(this, message, "초기화 실패", JOptionPane.ERROR_MESSAGE);
             
-            // 버튼 다시 활성화
-            confirmButton.setEnabled(true);
-            cancelButton.setText("취소");
+            // 창 닫기
+            dispose();
         });
     }
     
@@ -211,14 +212,7 @@ public class SwingDatabaseView extends JDialog implements DatabaseView {
             logArea.setCaretPosition(logArea.getDocument().getLength());
             
             // 창 닫기
-            Timer timer = new Timer(1000, new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    dispose();
-                }
-            });
-            timer.setRepeats(false);
-            timer.start();
+            dispose();
         });
     }
 }

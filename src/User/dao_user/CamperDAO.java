@@ -111,4 +111,33 @@ public class CamperDAO {
         return booked.isEmpty();
     }
 
+    /**
+     * 4) 특정 ID로 캠핑카 정보 조회
+     */
+    public Camper getCamperById(int camperId) throws SQLException {
+        String sql = "SELECT camper_id, name, vehicle_number, seats, image_url, details, rental_fee, rental_company_id, registration_date FROM Camper WHERE camper_id = ?";
+        
+        try (Connection conn = DBConnect.getUserConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, camperId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    Camper c = new Camper();
+                    c.setCamperId(rs.getInt("camper_id"));
+                    c.setName(rs.getString("name"));
+                    c.setVehicleNumber(rs.getString("vehicle_number"));
+                    c.setSeats(rs.getInt("seats"));
+                    c.setImageUrl(rs.getString("image_url"));
+                    c.setDetails(rs.getString("details"));
+                    c.setRentalFee(rs.getDouble("rental_fee"));
+                    c.setRentalCompanyId(rs.getInt("rental_company_id"));
+                    c.setRegistrationDate(rs.getDate("registration_date"));
+                    return c;
+                }
+            }
+        }
+        return null; // 해당 ID의 캠핑카가 없으면 null 반환
+    }
+
 }

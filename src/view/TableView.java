@@ -12,9 +12,7 @@ public interface TableView {
     String getWhereCondition();
     String getSetClause();
     String getWhereClause();
-    String getFullInsertSQL();
     String getInsertValues();
-    InsertMethod selectInsertMethod();
     boolean confirmDelete(String tableName, String condition);
     
     void showAllTables(List<TableInfo> tables);
