@@ -1,11 +1,9 @@
-
-
 -- 1. DB 삭제 및 생성
 DROP DATABASE IF EXISTS DBTEST;
 CREATE DATABASE DBTEST;
 USE DBTEST;
 
--- 2. 사용자 생성 및 권한 부여
+-- 2. 사용자 생성 (권한 부여는 맨 하단에 명시)
 DROP USER IF EXISTS 'user1'@'localhost';
 CREATE USER 'user1'@'localhost' IDENTIFIED BY 'user1';
 
